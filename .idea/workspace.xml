@@ -4,22 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e36ead0f-572d-434c-9116-d018ac518bc1" name="变更" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/README.V1.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/BPlusTree/Main.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/BPlusTree/V1/BPlusTree.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/BPlusTree/V1/BPlusTreeNodePage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/BPlusTree/V1/UniqueKeyException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/BPlusTree/util/RandomGenerator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/com/BPlusTree/V1/BPlusTreeTest.java" afterDir="false" />
+    <list default="true" id="e36ead0f-572d-434c-9116-d018ac518bc1" name="变更" comment="V1版本">
+      <change afterPath="$PROJECT_DIR$/docs/README.V2.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/README.V3.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/README.V1.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/README.V1.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -100,8 +91,16 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1718203055505</updated>
-      <workItem from="1718203057283" duration="3839000" />
+      <workItem from="1718203057283" duration="5117000" />
     </task>
+    <task id="LOCAL-00001" summary="V1版本">
+      <created>1718207107469</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1718207107469</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -117,5 +116,11 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <option name="CHECK_NEW_TODO" value="false" />
+    <MESSAGE value="V1版本" />
+    <option name="LAST_COMMIT_MESSAGE" value="V1版本" />
   </component>
 </project>
