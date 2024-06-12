@@ -1,8 +1,14 @@
 # 基于 Java 实现的 B+ 树
 > 参考文献:
 > - [B+树详解](https://ivanzz1001.github.io/records/post/data-structure/2018/06/16/ds-bplustree)
-> - [MySQL B+树相对于B树的区别及优势](https://juejin.cn/post/7117516433386373133)
 > - [数据结构合集 - B+树](https://www.bilibili.com/video/BV1bs421u7pY/)
+> - [MySQL B+树相对于B树的区别及优势](https://juejin.cn/post/7117516433386373133)
+> - [mysql InnoDB有几个文件 mysql innodb存储的文件结构](https://blog.51cto.com/u_16099267/9567953)
+> - [深入浅出索引（上）](https://time.geekbang.org/column/article/69236)
+> - [深入浅出索引（下）](https://time.geekbang.org/column/article/69636)
+> - [普通索引和唯一索引，应该怎么选择？](https://time.geekbang.org/column/article/70848)
+> - [怎么给字符串字段加索引？](https://time.geekbang.org/column/article/71492)
+> - [日志和索引相关问题](https://time.geekbang.org/column/article/73161)
 
 ## 运行环境
 - Java
