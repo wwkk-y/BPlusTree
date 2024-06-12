@@ -24,4 +24,5 @@
 | V2  | 完备版本, 实现了几乎全部功能, 实现方式上考虑了各种场景, 对细节进行了优化 | √   | √   | √   | √   | ×   | [V2版本文档](docs/README.V2.md) |
 | V3  | 数据库定制版本, 考虑数据持久化                        | √   | √   | √   | √   | √   | [V3版本文档](docs/README.V3.md) |
 
-> 基于此项目实现的关系型数据库: [EasySQL](https://github.com/wwkk-y/EasySQL)
+## 生态
+- 基于此项目实现的关系型数据库: [EasySQL](https://github.com/wwkk-y/EasySQL)
