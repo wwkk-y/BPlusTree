@@ -39,7 +39,7 @@
 
 要分裂的界面为 curPage
 1. 如果为根页面(curPage.parentListNode == null)
-   1. 将索引页均分成 left 和 right
+   1. 将索引页均分成 left 和 right (快慢指针, 实现细节见 SortedLinkList.midSplit() )
    2. 节点页设置为两个节点, 分别为 left 和 right 的最大值
    3. 绑定 left 和 right 的 parentListNode
 2. 均分索引页为 left 和 right
