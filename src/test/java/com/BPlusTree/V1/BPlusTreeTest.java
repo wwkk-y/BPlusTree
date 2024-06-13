@@ -4,31 +4,12 @@ package com.BPlusTree.V1;
 import com.BPlusTree.util.RandomGenerator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.BPlusTree.TestUtil.*;
+
 public class BPlusTreeTest {
-
-    // 输出分割线
-    public static void hr(int length) {
-        for (int i = 0; i < length; i++) {
-            System.out.print('-');
-        }
-        System.out.println("");
-    }
-
-    // 输出分割线
-    public static void hr() {
-        hr(50);
-    }
-
-    // 判断数组是否排序
-    public static <T extends Comparable<T>> boolean isSorted(ArrayList<T> list) {
-        ArrayList<T> sortedList = new ArrayList<>(list);
-        Collections.sort(sortedList);
-        return list.equals(sortedList);
-    }
 
     /**
      * 测试已经有数据的 B+ 树, B+ 树值类型统一用String
@@ -92,7 +73,7 @@ public class BPlusTreeTest {
             } catch (Exception e){
                 e.printStackTrace();
                 bPlusTree.out(true);
-                throw new UniqueKeyException("insert error: " + i);
+                throw new UniqueKeyException("treeInsert error: " + i);
             }
 
         }
@@ -123,7 +104,7 @@ public class BPlusTreeTest {
             } catch (Exception e){
                 e.printStackTrace();
                 bPlusTree.out(true);
-                throw new RuntimeException("insert error: " + i);
+                throw new RuntimeException("treeInsert error: " + i);
             }
 
         }
@@ -154,7 +135,7 @@ public class BPlusTreeTest {
             } catch (Exception e){
                 e.printStackTrace();
                 bPlusTree.out(true);
-                throw new RuntimeException("insert error: " + i);
+                throw new RuntimeException("treeInsert error: " + i);
             }
 
         }
@@ -185,7 +166,7 @@ public class BPlusTreeTest {
             } catch (Exception e){
                 bPlusTree.out(true);
                 e.printStackTrace();
-                throw new RuntimeException("insert error: " + i);
+                throw new RuntimeException("treeInsert error: " + i);
             }
 
         }
