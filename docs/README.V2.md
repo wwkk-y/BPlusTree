@@ -21,13 +21,16 @@
 ![img.png](files/img.png)
 > 父界面 parentPage 与子界面 childPage 对应关系:
 > - childPage.parentPage = parentPage
->  > childPage = new BPlusTreeNodePage<>(..., parentPage);
+>  ```java
+>  childPage = new BPlusTreeNodePage<>(..., parentPage);
+>  ```
 > - parentPage.nodes 每一个元素都含有一个 children 表示子节点页 = childPage
 > - parentPage.nodes 包含 childPage 最大索引值
 > - childPage.parentListNode = parentPage.nodes 里对应索引值所在节点
->  > parentKeyNode = new BPlusTreeNode<>(childPageMaxKey, childPage);
->  > 
->  > childPage.parentListNode = nodes.insert(childPageMaxKeyNode);
+>  ```java
+>  parentKeyNode = new BPlusTreeNode<>(childPageMaxKey, childPage);
+>  childPage.parentListNode = nodes.insert(childPageMaxKeyNode);
+>  ``` 
 
 
 
