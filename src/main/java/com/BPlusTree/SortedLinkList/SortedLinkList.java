@@ -184,8 +184,6 @@ public class SortedLinkList<T extends Comparable<T>> {
         return newNode;
     }
 
-
-
     /**
      * 查找第一个 >= val 的 Node
      */
@@ -270,7 +268,6 @@ public class SortedLinkList<T extends Comparable<T>> {
         }
         return null;
     }
-
 
     public long getSize() {
         return size;
