@@ -1,8 +1,10 @@
 package com.BPlusTree.SortedLinkList;
 
 import com.BPlusTree.util.RandomGenerator;
+import lombok.NonNull;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static com.BPlusTree.TestUtil.*;
 
@@ -234,7 +236,17 @@ public class SortedLinkListTest {
         System.out.println("success");
     }
 
+    public static void testNull(@NonNull Object o) {
+        System.out.println(o);
+    }
+
     public static void main(String[] args) {
+        try {
+            testNull(null);
+        } catch (NullPointerException e){
+            e.printStackTrace();
+        }
+
         for (int i = 0; i < 100; i++) {
             System.out.println(i);
             try {

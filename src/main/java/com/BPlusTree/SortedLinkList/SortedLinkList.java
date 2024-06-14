@@ -1,7 +1,7 @@
 package com.BPlusTree.SortedLinkList;
 
 import com.BPlusTree.util.CompareUtil;
-import com.sun.istack.internal.NotNull;
+import lombok.NonNull;
 
 import java.util.ArrayList;
 
@@ -28,7 +28,7 @@ public class SortedLinkList<T extends Comparable<T>> {
     /**
      * 初始化链表为一个节点, 考虑头尾指针改变和改变大小
      */
-    private void init(SortedLinkListNode<T> newNode){
+    private void init(@NonNull SortedLinkListNode<T> newNode){
         head = newNode;
         tail = newNode;
         size = 1;
@@ -38,7 +38,7 @@ public class SortedLinkList<T extends Comparable<T>> {
     /**
      * 在 cur 后面插入新节点, 考虑头尾指针改变和改变大小
      */
-    private void insertAfter(@NotNull SortedLinkListNode<T> cur, SortedLinkListNode<T> newNode){
+    private void insertAfter(@NonNull SortedLinkListNode<T> cur, SortedLinkListNode<T> newNode){
         /*
          cur <-> p2
          newNode
@@ -70,7 +70,7 @@ public class SortedLinkList<T extends Comparable<T>> {
     /**
      * 在 cur 前面插入新节点, 考虑头尾指针改变和改变大小
      */
-    private void insertBefore(@NotNull SortedLinkListNode<T> cur, SortedLinkListNode<T> newNode){
+    private void insertBefore(@NonNull SortedLinkListNode<T> cur, SortedLinkListNode<T> newNode){
         /*
          p1 <-> cur
          newNode
@@ -102,7 +102,7 @@ public class SortedLinkList<T extends Comparable<T>> {
     /**
      * 移除节点, 考虑头尾指针改变和改变大小
      */
-    private void removeNode(@NotNull SortedLinkListNode<T> node) {
+    private void removeNode(@NonNull SortedLinkListNode<T> node) {
         /*
             p1 <-> node <-> p2
             改成
@@ -133,7 +133,7 @@ public class SortedLinkList<T extends Comparable<T>> {
      * @param node 不能为 null, 且必须为本链表的节点
      * @return 插入的节点
      */
-    public SortedLinkListNode<T> insertAfter(@NotNull SortedLinkListNode<T> node, T val) throws DisorderedException {
+    public SortedLinkListNode<T> insertAfter(@NonNull SortedLinkListNode<T> node, T val) throws DisorderedException {
         SortedLinkListNode<T> p2 = node.next;
         // 保证有序
         if(CompareUtil.large(node.data, val)){
