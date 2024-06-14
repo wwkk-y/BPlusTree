@@ -110,16 +110,20 @@ public class BPlusTreeNodePage <K extends Comparable<K>, V> {
             // 设置为非叶子节点
             leaf = false;
         } else {
+            // 不为根界面直接把右边分裂出来
             SortedLinkList<BPlusTreeNode<K, V>> rightList = nodes.midSplit();
             BPlusTreeNodePage<K, V> rightPage = new BPlusTreeNodePage<>(degree, leaf, rightList, parentPage);
             BPlusTreeNode<K, V> rightMaxNode = rightPage.nodes.lastElement();
             BPlusTreeNode<K, V> rightKeyNode = new BPlusTreeNode<>(rightMaxNode.key, rightPage);
 
+            // 父界面添加索引
             try {
                 rightPage.parentListNode = parentPage.nodes.insertAfter(parentListNode, rightKeyNode);
             } catch (DisorderedException e) {
                 throw new RuntimeException(e);
             }
+
+            // 因为父页面节点增加, 尝试分裂
             parentPage.trySplit();
         }
 
