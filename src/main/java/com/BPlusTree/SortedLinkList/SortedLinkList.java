@@ -1,6 +1,7 @@
 package com.BPlusTree.SortedLinkList;
 
 import com.BPlusTree.util.CompareUtil;
+import com.sun.istack.internal.NotNull;
 
 import java.util.ArrayList;
 
@@ -25,67 +26,106 @@ public class SortedLinkList<T extends Comparable<T>> {
     }
 
     /**
-     * 在 cur 后面插入新节点
+     * 初始化链表为一个节点, 考虑头尾指针改变和改变大小
      */
-    private void insertAfter(SortedLinkListNode<T> cur, SortedLinkListNode<T> newNode){
+    private void init(SortedLinkListNode<T> newNode){
+        head = newNode;
+        tail = newNode;
+        size = 1;
+    }
+
+
+    /**
+     * 在 cur 后面插入新节点, 考虑头尾指针改变和改变大小
+     */
+    private void insertAfter(@NotNull SortedLinkListNode<T> cur, SortedLinkListNode<T> newNode){
         /*
-         p1 <-> cur <-> p2
+         cur <-> p2
          newNode
          转化成
-         p1 <-> cur <-> newNode <-> p2
+         cur <-> newNode <-> p2
          */
-        SortedLinkListNode<T> p1 = null;
-        SortedLinkListNode<T> p2 = null;
-        if(cur != null){
-            p1 = cur.pre;
-            p2 = cur.next;
-        }
-        // p1 -> cur -> next -> p2
-        if(cur != null){
-            cur.next = newNode;
-        }
+        SortedLinkListNode<T> p2 = cur.next;
+        // cur -> next -> p2
+        cur.next = newNode;
         if(newNode != null){
             newNode.next = p2;
         }
-        // p1 <- cur <- newNode <- p2
+        // cur <- newNode <- p2
         if(p2 != null){
             p2.pre = newNode;
         }
         if(newNode != null){
             newNode.pre = cur;
         }
+
+        // 可能改变了尾指针
+        if(tail == cur){
+            tail = newNode;
+        }
+
+        size += 1;
     }
 
     /**
-     * 在 cur 前面插入新节点
+     * 在 cur 前面插入新节点, 考虑头尾指针改变和改变大小
      */
-    private void insertBefore(SortedLinkListNode<T> cur, SortedLinkListNode<T> newNode){
+    private void insertBefore(@NotNull SortedLinkListNode<T> cur, SortedLinkListNode<T> newNode){
         /*
-         p1 <-> cur <-> p2
+         p1 <-> cur
          newNode
          转化成
-         p1 <-> newNode <-> cur <-> p2
+         p1 <-> newNode <-> cur
          */
-        SortedLinkListNode<T> p1 = null;
-        SortedLinkListNode<T> p2 = null;
-        if(cur != null){
-            p1 = cur.pre;
-            p2 = cur.next;
-        }
-        // p1 -> newNode -> cur -> p2
+        SortedLinkListNode<T> p1 = cur.pre;
+        // p1 -> newNode -> cur
         if(p1 != null){
             p1.next = newNode;
         }
         if(newNode != null){
             newNode.next = cur;
         }
-        // p1 <- newNode <- cur <- p2
-        if(cur != null){
-            cur.pre = newNode;
-        }
+        // p1 <- newNode <- cur
+        cur.pre = newNode;
         if(newNode != null){
             newNode.pre = p1;
         }
+
+        // 可能是头指针
+        if(cur == head){
+            head = newNode;
+        }
+
+        size += 1;
+    }
+
+    /**
+     * 移除节点, 考虑头尾指针改变和改变大小
+     */
+    private void removeNode(@NotNull SortedLinkListNode<T> node) {
+        /*
+            p1 <-> node <-> p2
+            改成
+            p1 <-> p2
+         */
+        SortedLinkListNode<T> p1 = node.pre;;
+        SortedLinkListNode<T> p2 = node.next;
+        if (p1 != null) {
+            p1.next = p2;
+        }
+        if(p2 != null){
+            p2.pre = p1;
+        }
+
+        // 考虑头尾指针改变
+        if(head == node){
+            head = p2;
+        }
+        if(tail == node){
+            tail = p1;
+        }
+
+        size -= 1;
     }
 
     /**
@@ -93,9 +133,7 @@ public class SortedLinkList<T extends Comparable<T>> {
      * @param node 不能为 null, 且必须为本链表的节点
      * @return 插入的节点
      */
-    public SortedLinkListNode<T> insertAfter(SortedLinkListNode<T> node, T val) throws DisorderedException {
-        // node <-> p2
-        // node <-> newNode <-> p2
+    public SortedLinkListNode<T> insertAfter(@NotNull SortedLinkListNode<T> node, T val) throws DisorderedException {
         SortedLinkListNode<T> p2 = node.next;
         // 保证有序
         if(CompareUtil.large(node.data, val)){
@@ -113,20 +151,8 @@ public class SortedLinkList<T extends Comparable<T>> {
         }
         // 开始插入
         SortedLinkListNode<T> newNode = new SortedLinkListNode<>(val);
-        // node -> newNode -> p2
-        node.next = newNode;
-        newNode.next = p2;
-        // node <- newNode <- p2
-        if(p2 != null){
-            p2.pre = newNode;
-        }
-        newNode.pre = node;
-        // 可能是在尾节点后插入数据
-        if(node == tail){
-            tail = newNode;
-        }
+        insertAfter(node, newNode);
 
-        size += 1;
         return newNode;
     }
 
@@ -136,8 +162,6 @@ public class SortedLinkList<T extends Comparable<T>> {
      * @return 插入的节点
      */
     public SortedLinkListNode<T> insertBefore(SortedLinkListNode<T> node, T val) throws DisorderedException {
-        // p1 <-> node
-        // p1 <-> newNode <-> node
         SortedLinkListNode<T> p1 = node.next;
         // 保证有序
         if(p1 != null && CompareUtil.large(p1.data, val)){
@@ -155,46 +179,12 @@ public class SortedLinkList<T extends Comparable<T>> {
         }
         // 开始插入
         SortedLinkListNode<T> newNode = new SortedLinkListNode<>(val);
-        // p1 -> newNode -> node
-        if(p1 != null){
-            p1.next = newNode;
-        }
-        newNode.next = node;
-        // p1 <- newNode <- node
-        node.pre = newNode;
-        newNode.pre = p1;
-        // 可能是在头节点后插入数据
-        if(node == head){
-            head = newNode;
-        }
+        insertBefore(node, newNode);
 
-        size += 1;
         return newNode;
     }
 
 
-    /**
-     * 移除节点
-     */
-    private void removeNode(SortedLinkListNode<T> node) {
-        /*
-            p1 <-> node <-> p2
-            改成
-            p1 <-> p2
-         */
-        SortedLinkListNode<T> p1 = null;
-        SortedLinkListNode<T> p2 = null;
-        if (node != null) {
-            p1 = node.pre;
-            p2 = node.next;
-        }
-        if (p1 != null) {
-            p1.next = p2;
-        }
-        if(p2 != null){
-            p2.pre = p1;
-        }
-    }
 
     /**
      * 查找第一个 >= val 的 Node
@@ -230,10 +220,8 @@ public class SortedLinkList<T extends Comparable<T>> {
 
         // 如果 head 为空 -> 直接添加数据
         if(head == null){
-            head = newNode;
-            tail = head;
+            init(newNode);
 
-            size += 1;
             return newNode;
         }
 
@@ -243,9 +231,6 @@ public class SortedLinkList<T extends Comparable<T>> {
         // 判断 leNode 是否为 null -> 需要更新尾指针
         if(leNode == null){
             insertAfter(tail, newNode);
-            tail = newNode;
-
-            size += 1;
             return newNode;
         }
 
@@ -254,19 +239,9 @@ public class SortedLinkList<T extends Comparable<T>> {
             throw new RepeatValueException("不能插入重复的值: " + val);
         }
 
-        // 判断 leNode 是否为 head -> 需要在前面插入数据
-        if(leNode == head){
-            insertBefore(head, newNode);
-            head = newNode;
-
-            size += 1;
-            return newNode;
-        }
-
         // 在 leNode 前面插入值
         insertBefore(leNode, newNode);
 
-        size += 1;
         return newNode;
     }
 
@@ -280,16 +255,8 @@ public class SortedLinkList<T extends Comparable<T>> {
         if(node == null){
             return false;
         }
-        // 为 head
-        if(node == head){
-            head = head.next;
-        }
-        // 为 tail
-        if(node == tail){
-            tail = tail.pre;
-        }
+
         removeNode(node);
-        size -= 1;
         return true;
     }
 
@@ -416,7 +383,6 @@ public class SortedLinkList<T extends Comparable<T>> {
             tail = newNode;
         }
 
-        size += 1;
         return newNode;
     }
 
