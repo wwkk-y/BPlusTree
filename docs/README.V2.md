@@ -19,6 +19,18 @@
 这里采取的策略是, 一个父节点对应一个子页面(子节点集合), 父节点的值是子节点里的最大值, 举个例子, 如下
 
 ![img.png](files/img.png)
+> 父界面 parentPage 与子界面 childPage 对应关系:
+> - childPage.parentPage = parentPage
+>  > childPage = new BPlusTreeNodePage<>(..., parentPage);
+> - parentPage.nodes 每一个元素都含有一个 children 表示子节点页 = childPage
+> - parentPage.nodes 包含 childPage 最大索引值
+> - childPage.parentListNode = parentPage.nodes 里对应索引值所在节点
+>  > parentKeyNode = new BPlusTreeNode<>(childPageMaxKey, childPage);
+>  > 
+>  > childPage.parentListNode = nodes.insert(childPageMaxKeyNode);
+
+
+
 
 ## 算法
 
@@ -41,10 +53,12 @@
 1. 如果为根页面(curPage.parentListNode == null)
    1. 将索引页均分成 left 和 right (快慢指针, 实现细节见 SortedLinkList.midSplit() )
    2. 节点页设置为两个节点, 分别为 left 和 right 的最大值
-   3. 绑定 left 和 right 的 parentListNode
-2. 均分索引页为 left 和 right
-3. 在 right 的父节点左边插入一个新节点 newListNode 索引 left
-4. left 的 parentListNode 设为 newListNode
+   3. 绑定 left 和 right 对应父子节点关系
+   4. 当前界面设为非叶子
+2. 不为根节点 
+   1. 均分索引页为 left 和 right, curPage 为 left, 更新父节点索引值
+   2. 在 left 索引的右边添加 right 的索引, 绑定 right 和父节点的关系
+   3. 如果父页大小超出阶数, 分裂父页
 
 ### 插入
 > 实现: BPlusTreeNodePage.treeInsert(K key, V value)
@@ -53,7 +67,7 @@
 1. 在当前页查找第一个 >= key 的节点 leTreeNode
    1. 如果没有找到, 表示当前 key 为最大值, 判断当前页面是不是叶子
       1. true: 直接在当前页末尾插入新节点, 判断是否大于阶数, 大于就分裂当前页(见分裂算法)
-      2. false: 在最后一个节点的子节点页插入节点, 更新当前索引值为最大值 key
+      2. false: 更新最后的索引值为最大值 key, 在最后一个节点的子节点页插入节点
    2. return
 2. 判断当前界面是不是叶子
    1. true: 尝试在当前页插入新节点, 如果插入成功, 判断是否大于阶数, 大于就分裂当前页(见分裂算法)

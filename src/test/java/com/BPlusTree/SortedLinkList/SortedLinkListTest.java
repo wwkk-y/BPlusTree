@@ -168,7 +168,10 @@ public class SortedLinkListTest {
         SortedLinkList<String> list = new SortedLinkList<String>(false);
         for (int i = 0; i < size; i++) {
             String val = RandomGenerator.generateRandomString(20);
-            list.insert(val);
+            SortedLinkListNode<String> node = list.insert(val);
+            if(node.getData().compareTo(val) != 0){
+                throw new RuntimeException("插入数据不对");
+            }
         }
         ArrayList<String> toList = list.toList();
         if(!isSorted(toList)){
@@ -184,7 +187,10 @@ public class SortedLinkListTest {
         SortedLinkList<Integer> list = new SortedLinkList<>(false);
         for (int i = 0; i < size; i++) {
             Integer val = RandomGenerator.generateRandomNumber(1, Integer.MAX_VALUE);
-            list.insert(val);
+            SortedLinkListNode<Integer> node = list.insert(val);
+            if(node.getData().compareTo(val) != 0){
+                throw new RuntimeException("插入数据不对");
+            }
         }
         ArrayList<Integer> toList = list.toList();
         if(!isSorted(toList)){
@@ -225,20 +231,25 @@ public class SortedLinkListTest {
     }
 
     public static void main(String[] args) {
-//        for (int i = 0; i < 100; i++) {
-//            System.out.println(i);
-//            try {
-//                testInsert(3000);
-//                testSearch(3000);
-//                testDelete(3000);
-//            } catch (RepeatValueException e){
-//                e.printStackTrace();
-//            }
-//            hr();
-//        }
-        for (int i = 100; i < 10000; i *= 2) {
-            testMidSplit(i);
-            testMidSplit(i + 1);
+        for (int i = 0; i < 100; i++) {
+            System.out.println(i);
+            try {
+                testInsert(3000);
+                testSearch(3000);
+                testDelete(3000);
+            } catch (RepeatValueException e){
+                e.printStackTrace();
+            }
+            hr();
         }
+        for (int i = 0; i < 100; i++) {
+            System.out.println(i);
+            for (int j = 100; j < 10000; j *= 2) {
+                testMidSplit(j);
+                testMidSplit(j + 1);
+            }
+            hr();
+        }
+
     }
 }

@@ -1,6 +1,5 @@
 package com.BPlusTree.SortedLinkList;
 
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 
 /**
@@ -88,6 +87,43 @@ public class SortedLinkList<T extends Comparable<T>> {
     }
 
     /**
+     * 在 node 后面插入新值, 保证有序
+     * @return 插入的节点
+     */
+    public SortedLinkListNode<T> insertAfter(SortedLinkListNode<T> node, T val){
+        // node <-> p2
+        // node <-> newNode <-> p2
+        SortedLinkListNode<T> p2 = node.next;
+        // 保证有序
+        if(node.data.compareTo(val) > 0){
+            throw new RepeatValueException();
+        }
+        if(p2 != null && p2.data.compareTo(val) < 0){
+            throw new RepeatValueException();
+        }
+        // 有 unique 时 唯一性约束
+        if(unique && node.data.compareTo(val) == 0){
+            throw new RepeatValueException();
+        }
+        if(p2 != null && unique && p2.data.compareTo(val) == 0){
+            throw new RepeatValueException();
+        }
+        // 开始插入
+        SortedLinkListNode<T> newNode = new SortedLinkListNode<>(val);
+        // node -> newNode -> p2
+        node.next = newNode;
+        newNode.next = p2;
+        // node <- newNode <- p2
+        if(p2 != null){
+            p2.pre = newNode;
+        }
+        newNode.pre = node;
+
+        return newNode;
+    }
+
+
+    /**
      * 移除节点
      */
     private void removeNode(SortedLinkListNode<T> node) {
@@ -143,14 +179,16 @@ public class SortedLinkList<T extends Comparable<T>> {
     /**
      * 插入数据, 如果不允许重复值时插入了重复值抛出 RepeatValueException
      */
-    public void insert(T val){
+    public SortedLinkListNode<T> insert(T val){
+        SortedLinkListNode<T> newNode = new SortedLinkListNode<>(val);
+
         // 如果 head 为空 -> 直接添加数据
         if(head == null){
-            head = new SortedLinkListNode<>(val);
+            head = newNode;
             tail = head;
 
             size += 1;
-            return;
+            return newNode;
         }
 
         // 查找第一个 >= val 的节点 cur
@@ -158,12 +196,11 @@ public class SortedLinkList<T extends Comparable<T>> {
 
         // 判断 leNode 是否为 null -> 需要更新尾指针
         if(leNode == null){
-            SortedLinkListNode<T> newTail = new SortedLinkListNode<>(val);
-            insertAfter(tail, newTail);
-            tail = newTail;
+            insertAfter(tail, newNode);
+            tail = newNode;
 
             size += 1;
-            return;
+            return newNode;
         }
 
         // 根据需求判断是否需要唯一
@@ -173,19 +210,18 @@ public class SortedLinkList<T extends Comparable<T>> {
 
         // 判断 leNode 是否为 head -> 需要在前面插入数据
         if(leNode == head){
-            SortedLinkListNode<T> newHead = new SortedLinkListNode<>(val);
-            insertBefore(head, newHead);
-            head = newHead;
+            insertBefore(head, newNode);
+            head = newNode;
 
             size += 1;
-            return;
+            return newNode;
         }
 
         // 在 leNode 前面插入值
-        SortedLinkListNode<T> newNode = new SortedLinkListNode<>(val);
         insertBefore(leNode, newNode);
 
         size += 1;
+        return newNode;
     }
 
     /**
@@ -308,5 +344,43 @@ public class SortedLinkList<T extends Comparable<T>> {
         head = null;
         tail = null;
         size = 0;
+    }
+
+    /**
+     * 在尾部添加一个值, 要求插入值保证原链表有序, 否则抛出异常
+     * @return 返回插入元素所在节点
+     * @throws DisorderedException 新元素 < 最大值时抛出
+     */
+    public SortedLinkListNode<T> pushBack(T val) throws DisorderedException {
+        // tail -> NULL
+        // tail <-> newNode -> NULL
+        SortedLinkListNode<T> newNode = new SortedLinkListNode<>(val);
+        if(tail == null){
+            tail = newNode;
+            head = newNode;
+        } else {
+            // 判断大小 和 唯一
+            if(tail.data.compareTo(val) > 0){
+                throw new DisorderedException("尾部插入的元素小于最大值: " + tail.data + " < " + val);
+            }
+            if(unique && tail.data.compareTo(val) == 0){
+                throw new RepeatValueException("不能插入重复的元素");
+            }
+            insertAfter(tail, newNode);
+            tail = newNode;
+        }
+
+        size += 1;
+        return newNode;
+    }
+
+    /**
+     * 获取最后一个元素
+     */
+    public T lastElement(){
+        if(tail == null){
+            return null;
+        }
+        return tail.data;
     }
 }
