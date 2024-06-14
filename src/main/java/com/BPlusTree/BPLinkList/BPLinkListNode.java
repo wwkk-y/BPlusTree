@@ -8,4 +8,8 @@ public class BPLinkListNode <T>{
     public BPLinkListNode(T data){
         this.data = data;
     }
+
+    public T getData(){
+        return data;
+    }
 }
