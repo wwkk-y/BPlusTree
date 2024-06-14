@@ -1,5 +1,7 @@
 package com.BPlusTree.SortedLinkList;
 
+import com.BPlusTree.util.CompareUtil;
+
 import java.util.ArrayList;
 
 /**
@@ -88,24 +90,25 @@ public class SortedLinkList<T extends Comparable<T>> {
 
     /**
      * 在 node 后面插入新值, 保证有序
+     * @param node 不能为 null, 且必须为本链表的节点
      * @return 插入的节点
      */
-    public SortedLinkListNode<T> insertAfter(SortedLinkListNode<T> node, T val){
+    public SortedLinkListNode<T> insertAfter(SortedLinkListNode<T> node, T val) throws DisorderedException {
         // node <-> p2
         // node <-> newNode <-> p2
         SortedLinkListNode<T> p2 = node.next;
         // 保证有序
-        if(node.data.compareTo(val) > 0){
-            throw new RepeatValueException();
+        if(CompareUtil.large(node.data, val)){
+            throw new DisorderedException();
         }
-        if(p2 != null && p2.data.compareTo(val) < 0){
-            throw new RepeatValueException();
+        if(p2 != null && CompareUtil.small(p2.data, val)){
+            throw new DisorderedException();
         }
         // 有 unique 时 唯一性约束
-        if(unique && node.data.compareTo(val) == 0){
+        if(unique && CompareUtil.equal(node.data, val)){
             throw new RepeatValueException();
         }
-        if(p2 != null && unique && p2.data.compareTo(val) == 0){
+        if(p2 != null && unique && CompareUtil.equal(p2.data, val)){
             throw new RepeatValueException();
         }
         // 开始插入
@@ -118,7 +121,54 @@ public class SortedLinkList<T extends Comparable<T>> {
             p2.pre = newNode;
         }
         newNode.pre = node;
+        // 可能是在尾节点后插入数据
+        if(node == tail){
+            tail = newNode;
+        }
 
+        size += 1;
+        return newNode;
+    }
+
+    /**
+     * 在 node 后面插入一个新节点，保证有序
+     * @param node 不能为 null, 且必须为本链表的节点
+     * @return 插入的节点
+     */
+    public SortedLinkListNode<T> insertBefore(SortedLinkListNode<T> node, T val) throws DisorderedException {
+        // p1 <-> node
+        // p1 <-> newNode <-> node
+        SortedLinkListNode<T> p1 = node.next;
+        // 保证有序
+        if(p1 != null && CompareUtil.large(p1.data, val)){
+            throw new DisorderedException();
+        }
+        if(CompareUtil.small(node.data, val)){
+            throw new DisorderedException();
+        }
+        // 有 unique 时 唯一性约束
+        if(unique && CompareUtil.equal(node.data, val)){
+            throw new RepeatValueException();
+        }
+        if(unique && p1 != null && CompareUtil.equal(p1.data, val)){
+            throw new RepeatValueException();
+        }
+        // 开始插入
+        SortedLinkListNode<T> newNode = new SortedLinkListNode<>(val);
+        // p1 -> newNode -> node
+        if(p1 != null){
+            p1.next = newNode;
+        }
+        newNode.next = node;
+        // p1 <- newNode <- node
+        node.pre = newNode;
+        newNode.pre = p1;
+        // 可能是在头节点后插入数据
+        if(node == head){
+            head = newNode;
+        }
+
+        size += 1;
         return newNode;
     }
 
@@ -152,7 +202,7 @@ public class SortedLinkList<T extends Comparable<T>> {
     public SortedLinkListNode<T> findFirstLeNode(T val){
         SortedLinkListNode<T> p = head;
         while(p != null){
-            if(p.data.compareTo(val) >= 0){
+            if(CompareUtil.largeEqual(p.data, val)){
                 return p;
             }
             p = p.next;
@@ -165,15 +215,11 @@ public class SortedLinkList<T extends Comparable<T>> {
      * 查找第一个 >= val 的 值
      */
     public T findFirstLeElement(T val){
-        SortedLinkListNode<T> p = head;
-        while(p != null){
-            if(p.data.compareTo(val) >= 0){
-                return p.data;
-            }
-            p = p.next;
+        SortedLinkListNode<T> node = findFirstLeNode(val);
+        if(node == null){
+            return null;
         }
-
-        return null;
+        return node.data;
     }
 
     /**
@@ -204,7 +250,7 @@ public class SortedLinkList<T extends Comparable<T>> {
         }
 
         // 根据需求判断是否需要唯一
-        if(unique && leNode.data.compareTo(val) == 0){
+        if(unique && CompareUtil.equal(leNode.data, val)){
             throw new RepeatValueException("不能插入重复的值: " + val);
         }
 
@@ -252,7 +298,7 @@ public class SortedLinkList<T extends Comparable<T>> {
      */
     public SortedLinkListNode<T> getNode(T val){
         SortedLinkListNode<T> leNode = findFirstLeNode(val);
-        if(leNode != null && leNode.data.compareTo(val) == 0){
+        if(leNode != null && CompareUtil.equal(leNode.data, val)){
             return leNode;
         }
         return null;
@@ -360,10 +406,10 @@ public class SortedLinkList<T extends Comparable<T>> {
             head = newNode;
         } else {
             // 判断大小 和 唯一
-            if(tail.data.compareTo(val) > 0){
+            if(CompareUtil.large(tail.data, val)){
                 throw new DisorderedException("尾部插入的元素小于最大值: " + tail.data + " < " + val);
             }
-            if(unique && tail.data.compareTo(val) == 0){
+            if(unique && CompareUtil.equal(tail.data, val)){
                 throw new RepeatValueException("不能插入重复的元素");
             }
             insertAfter(tail, newNode);

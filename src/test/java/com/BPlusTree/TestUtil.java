@@ -1,5 +1,7 @@
 package com.BPlusTree;
 
+import com.BPlusTree.util.CompareUtil;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +23,7 @@ public class TestUtil {
     // 判断数组是否排序
     public static <T extends Comparable<T>> boolean isSorted(List<T> list) {
         ArrayList<T> sortedList = new ArrayList<>(list);
-        Collections.sort(sortedList);
+        sortedList.sort(CompareUtil::compare);
         return list.equals(sortedList);
     }
 }

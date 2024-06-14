@@ -3,6 +3,7 @@ package com.BPlusTree.V2;
 import com.BPlusTree.SortedLinkList.DisorderedException;
 import com.BPlusTree.SortedLinkList.SortedLinkList;
 import com.BPlusTree.SortedLinkList.SortedLinkListNode;
+import com.BPlusTree.util.CompareUtil;
 
 /**
  * B+ 树节点页
@@ -39,7 +40,7 @@ public class BPlusTreeNodePage <K extends Comparable<K>, V> {
 
         // 是叶子节点, 就判断值是不是相等
         if(leTreeNode.leaf){
-            if(leTreeNode.key.compareTo(key) == 0){
+            if(CompareUtil.equal(leTreeNode.key, key)){
                 return leTreeNode.data;
             } else {
                 return null;
@@ -60,12 +61,16 @@ public class BPlusTreeNodePage <K extends Comparable<K>, V> {
                 try {
                     nodes.pushBack(new BPlusTreeNode<>(key, true, value));
                 } catch (DisorderedException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
             } else {
                 BPlusTreeNode<K, V> lastKeyNode = nodes.lastElement();
                 lastKeyNode.key = key;
                 lastKeyNode.children.treeInsert(key, value);
+            }
+        } else {
+            if(leaf){
+//                nodes.insertAfter()
             }
         }
     }
@@ -99,7 +104,7 @@ public class BPlusTreeNodePage <K extends Comparable<K>, V> {
                 leftPage.parentListNode = nodes.pushBack(leftKeyNode);
                 rightPage.parentListNode = nodes.pushBack(rightKeyNode);
             } catch (DisorderedException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
 
             // 设置为非叶子节点
@@ -110,7 +115,11 @@ public class BPlusTreeNodePage <K extends Comparable<K>, V> {
             BPlusTreeNode<K, V> rightMaxNode = rightPage.nodes.lastElement();
             BPlusTreeNode<K, V> rightKeyNode = new BPlusTreeNode<>(rightMaxNode.key, rightPage);
 
-            rightPage.parentListNode = parentPage.nodes.insertAfter(parentListNode, rightKeyNode);
+            try {
+                rightPage.parentListNode = parentPage.nodes.insertAfter(parentListNode, rightKeyNode);
+            } catch (DisorderedException e) {
+                throw new RuntimeException(e);
+            }
             parentPage.trySplit();
         }
 

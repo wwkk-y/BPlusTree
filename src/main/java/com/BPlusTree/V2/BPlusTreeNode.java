@@ -1,6 +1,6 @@
 package com.BPlusTree.V2;
 
-import com.BPlusTree.SortedLinkList.SortedLinkList;
+import com.BPlusTree.util.CompareUtil;
 
 /**
  * B+ 树节点
@@ -38,6 +38,6 @@ public class BPlusTreeNode<K extends Comparable<K>, V> implements Comparable<BPl
 
     @Override
     public int compareTo(BPlusTreeNode<K, V> o) {
-        return key.compareTo(o.key);
+        return CompareUtil.compare(this.key, o.key);
     }
 }

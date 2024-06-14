@@ -12,10 +12,11 @@ public class SortedLinkListTest {
     public static void testInsert(int size){
         // 整数
         SortedLinkList<Integer> intList = new SortedLinkList<>(true);
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size - 1; i++) {
             int val = RandomGenerator.generateRandomNumber(1, Integer.MAX_VALUE);
             intList.insert(val);
         }
+        intList.insert(null);
         ArrayList<Integer> intArrayList = intList.toList();
         // 验证大小对不对
         if(intArrayList.size() != intList.getSize() || intArrayList.size() != size){
@@ -23,6 +24,7 @@ public class SortedLinkListTest {
         }
         // 验证是否排好序
         if(!isSorted(intArrayList)){
+            System.out.println(intArrayList);
             throw new RuntimeException("未排序");
         }
 
@@ -44,10 +46,12 @@ public class SortedLinkListTest {
 
         // 允许重复
         SortedLinkList<Integer> intList2 = new SortedLinkList<>(false);
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size - 2; i++) {
             int val = RandomGenerator.generateRandomNumber(1, 100);
             intList2.insert(val);
         }
+        intList2.insert(null);
+        intList2.insert(null);
         ArrayList<Integer> intArrayList2 = intList2.toList();
         // 验证大小对不对
         if(intArrayList2.size() != intList2.getSize() || intArrayList2.size() != size){
