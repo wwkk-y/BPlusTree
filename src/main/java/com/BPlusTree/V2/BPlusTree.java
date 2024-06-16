@@ -42,6 +42,20 @@ public class BPlusTree<K extends Comparable<K>, V> {
     }
 
     /**
+     * 更新
+     * @return 更新成功返回true(有可能key不存在)
+     */
+    public boolean update(K key, V val){
+        BPlusTreeNode<K, V> treeNode = rootPage.treeSelectNode(key);
+        if(treeNode == null){
+            return false;
+        }
+
+        treeNode.data = val;
+        return true;
+    }
+
+    /**
      * 将B+树里保存的键值转化成键值对列表
      */
     public ArrayList<KVPair<K, V>> toKVPairList(){

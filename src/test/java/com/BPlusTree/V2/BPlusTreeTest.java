@@ -87,7 +87,53 @@ public class BPlusTreeTest {
         }
     }
 
+    public static void testSelect(int degree, boolean unique, int size){
+        BPlusTree<String, String> bPlusTree = testInsert(degree, unique, size);
+        ArrayList<BPlusTree.KVPair<String, String>> kvPairs = bPlusTree.toKVPairList();
+        kvPairs.forEach(kv -> {
+            if(bPlusTree.select(kv.getKey()).compareTo(kv.getVal()) != 0){
+                throw new RuntimeException("查找错误");
+            }
+        });
+        System.out.println("success");
+    }
+
+    public static void testSelectMain(){
+        for (int i = 3; i < 1000; i *= 2) {
+            for (int j = i - 1;  j < 100000; j *= 3) {
+                System.out.printf("degree: %d, size: %d \n", i, j);
+                testSelect(i, true, j);
+                TestUtil.hr();
+            }
+        }
+    }
+
+    public static void testUpdate(int degree, boolean unique, int size){
+        BPlusTree<String, String> bPlusTree = testInsert(degree, unique, size);
+        ArrayList<BPlusTree.KVPair<String, String>> kvPairs = bPlusTree.toKVPairList();
+        kvPairs.forEach(kv -> {
+            bPlusTree.update(kv.getKey(), "1");
+            if (bPlusTree.select(kv.getKey()).compareTo("1") != 0) {
+                throw new RuntimeException("更新错误");
+            }
+        });
+
+        System.out.println("success");
+    }
+
+    public static void testUpdateMain(){
+        for (int i = 3; i < 1000; i *= 2) {
+            for (int j = i - 1;  j < 100000; j *= 3) {
+                System.out.printf("degree: %d, size: %d \n", i, j);
+                testUpdate(i, true, j);
+                TestUtil.hr();
+            }
+        }
+    }
+
     public static void main(String[] args) {
         testInsertMain(); // 测试插入
+        testSelectMain(); // 测试查找
+        testUpdateMain(); // 测试更新
     }
 }

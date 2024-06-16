@@ -47,6 +47,18 @@ public class BPlusTreeNodePage <K extends Comparable<K>, V> {
      * 查找 key 对应的值
      */
     public V treeSelect(K key){
+        BPlusTreeNode<K, V> node = treeSelectNode(key);
+        if(node == null){
+            return null;
+        }
+
+        return node.data;
+    }
+
+    /**
+     * 查找 key 对应的节点
+     */
+    public BPlusTreeNode<K, V> treeSelectNode(K key){
         // 查找第一个 >= key 的节点
         BPlusTreeNode<K, V> leTreeNode = nodes.findFirstLeElement(new BPlusTreeNode<>(key));
         if(leTreeNode == null){
@@ -56,14 +68,14 @@ public class BPlusTreeNodePage <K extends Comparable<K>, V> {
         // 是叶子节点, 就判断值是不是相等
         if(leTreeNode.leaf){
             if(CompareUtil.equal(leTreeNode.key, key)){
-                return leTreeNode.data;
+                return leTreeNode;
             } else {
                 return null;
             }
         }
 
         // 不是叶子节点, 就继续搜索该节点的子节点页
-        return leTreeNode.children.treeSelect(key);
+        return leTreeNode.children.treeSelectNode(key);
     }
 
     /**
