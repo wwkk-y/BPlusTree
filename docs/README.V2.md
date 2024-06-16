@@ -11,14 +11,15 @@
 - 唯一索引, key不能重复
 - 节点页使用链表的形式
   > 由于官方库的链表不能直接操作节点, 且不有序, 相当于每次都要从头节点开始, 效率很低, 所以这里自己实现了一个有序链表 
-  > > 源码: src/main/java/com/BPlusTree/EasyLinkList
+  > - 有序链表: src/main/java/com/BPlusTree/SortedLinkList
+  > - 普通链表: src/main/java/com/BPlusTree/BPLinkList
 - 数据页用链表串起来
 
 ## 结构
 
 这里采取的策略是, 一个父节点对应一个子页面(子节点集合), 父节点的值是子节点里的最大值, 举个例子, 如下
 
-![img.png](files/img.png)
+![img.png](./files/img.png)
 > 父界面 parentPage 与子界面 childPage 对应关系:
 > - childPage.parentPage = parentPage
 >  ```java
