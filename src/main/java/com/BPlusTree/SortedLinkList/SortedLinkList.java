@@ -1,9 +1,11 @@
 package com.BPlusTree.SortedLinkList;
 
+import com.BPlusTree.BPLinkList.BPLinkListNode;
 import com.BPlusTree.util.CompareUtil;
 import lombok.NonNull;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * 有序双向链表
@@ -154,7 +156,7 @@ public class SortedLinkList<T extends Comparable<T>> {
      * @return 插入的节点
      */
     public SortedLinkListNode<T> insertBefore(SortedLinkListNode<T> node, T val) throws DisorderedException {
-        SortedLinkListNode<T> p1 = node.next;
+        SortedLinkListNode<T> p1 = node.pre;
         // 保证有序
         if(p1 != null && CompareUtil.large(p1.data, val)){
             throw new DisorderedException();
@@ -358,8 +360,7 @@ public class SortedLinkList<T extends Comparable<T>> {
         // tail <-> newNode -> NULL
         SortedLinkListNode<T> newNode = new SortedLinkListNode<>(val);
         if(tail == null){
-            tail = newNode;
-            head = newNode;
+            init(newNode);
         } else {
             // 判断大小 和 唯一
             if(CompareUtil.large(tail.data, val)){
@@ -383,5 +384,17 @@ public class SortedLinkList<T extends Comparable<T>> {
             return null;
         }
         return tail.data;
+    }
+
+    /**
+     * 遍历链表
+     * @param action 执行的函数
+     */
+    public void forEach(@NonNull Consumer<? super T> action){
+        SortedLinkListNode<T> p = head;
+        while (p != null){
+            action.accept(p.data);
+            p = p.next;
+        }
     }
 }

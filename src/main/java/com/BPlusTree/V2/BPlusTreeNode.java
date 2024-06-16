@@ -40,4 +40,9 @@ public class BPlusTreeNode<K extends Comparable<K>, V> implements Comparable<BPl
     public int compareTo(BPlusTreeNode<K, V> o) {
         return CompareUtil.compare(this.key, o.key);
     }
+
+    @Override
+    public String toString() {
+        return key.toString();
+    }
 }

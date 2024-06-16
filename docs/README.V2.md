@@ -58,11 +58,14 @@
    1. 将索引页均分成 left 和 right (快慢指针, 实现细节见 SortedLinkList.midSplit() )
    2. 节点页设置为两个节点, 分别为 left 和 right 的最大值
    3. 绑定 left 和 right 对应父子节点关系
-   4. 当前界面设为非叶子
+   4. 为页界面时, 需要把根界面设置为非叶子, 并更新叶子界面链表
+   5. 不为页界面时, 需要更新儿子的父界面
 2. 不为根节点 
    1. 均分索引页为 left 和 right, curPage 为 left, 更新父节点索引值
    2. 在 left 索引的右边添加 right 的索引, 绑定 right 和父节点的关系
-   3. 如果父页大小超出阶数, 分裂父页
+   3. 为页界面时, 并更新叶子界面链表
+   4. 不为页界面时, 需要更新儿子的父界面
+   5. 如果父页大小超出阶数, 分裂父页
 
 ### 插入
 > 实现: BPlusTreeNodePage.treeInsert(K key, V value)

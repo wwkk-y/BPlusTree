@@ -2,6 +2,8 @@ package com.BPlusTree.BPLinkList;
 
 import lombok.NonNull;
 
+import java.util.function.Consumer;
+
 public class BPLinkList <T>{
     private BPLinkListNode<T> head;
     private BPLinkListNode<T> tail;
@@ -138,10 +140,23 @@ public class BPLinkList <T>{
     /**
      * 在 node 后面插入新节点
      */
-    public BPLinkListNode<T> insertAfter(BPLinkListNode<T> node, T val){
+    public BPLinkListNode<T> insertAfter(@NonNull BPLinkListNode<T> node, T val){
         BPLinkListNode<T> newNode = new BPLinkListNode<>(val);
         insertAfter(node, newNode);
         return newNode;
+    }
+
+
+    /**
+     * 遍历链表
+     * @param action 执行的函数
+     */
+    public void forEach(@NonNull Consumer<? super T> action){
+        BPLinkListNode<T> p = head;
+        while (p != null){
+            action.accept(p.data);
+            p = p.next;
+        }
     }
 
 }
