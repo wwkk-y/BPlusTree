@@ -19,7 +19,7 @@ public class BPLinkList <T>{
     /**
      * 在 cur 后面插入新节点, 考虑头尾指针改变和改变大小
      */
-    private void insertAfter(@NonNull BPLinkListNode<T> cur, BPLinkListNode<T> newNode){
+    private void insertAfter(@NonNull BPLinkListNode<T> cur, @NonNull BPLinkListNode<T> newNode){
         /*
          cur <-> p2
          newNode
@@ -29,16 +29,12 @@ public class BPLinkList <T>{
         BPLinkListNode<T> p2 = cur.next;
         // cur -> next -> p2
         cur.next = newNode;
-        if(newNode != null){
-            newNode.next = p2;
-        }
+        newNode.next = p2;
         // cur <- newNode <- p2
         if(p2 != null){
             p2.pre = newNode;
         }
-        if(newNode != null){
-            newNode.pre = cur;
-        }
+        newNode.pre = cur;
 
         // 可能改变了尾指针
         if(tail == cur){
@@ -51,7 +47,7 @@ public class BPLinkList <T>{
     /**
      * 在 cur 前面插入新节点, 考虑头尾指针改变和改变大小
      */
-    private void insertBefore(@NonNull BPLinkListNode<T> cur, BPLinkListNode<T> newNode){
+    private void insertBefore(@NonNull BPLinkListNode<T> cur, @NonNull BPLinkListNode<T> newNode){
         /*
          p1 <-> cur
          newNode
@@ -63,14 +59,10 @@ public class BPLinkList <T>{
         if(p1 != null){
             p1.next = newNode;
         }
-        if(newNode != null){
-            newNode.next = cur;
-        }
+        newNode.next = cur;
         // p1 <- newNode <- cur
         cur.pre = newNode;
-        if(newNode != null){
-            newNode.pre = p1;
-        }
+        newNode.pre = p1;
 
         // 可能是头指针
         if(cur == head){
@@ -83,7 +75,7 @@ public class BPLinkList <T>{
     /**
      * 移除节点, 考虑头尾指针改变和改变大小
      */
-    private void removeNode(@NonNull BPLinkListNode<T> node) {
+    public void removeNode(@NonNull BPLinkListNode<T> node) {
         /*
             p1 <-> node <-> p2
             改成
@@ -124,5 +116,32 @@ public class BPLinkList <T>{
         return newNode;
     }
 
+    /**
+     * 清空链表
+     */
+    public void clear(){
+        head = null;
+        tail = null;
+        size = 0;
+    }
+
+    /**
+     * 删除最后一个节点
+     * @return 删除的节点
+     */
+    public BPLinkListNode<T> popBack(){
+        BPLinkListNode<T> lastNode = tail;
+        removeNode(tail);
+        return lastNode;
+    }
+
+    /**
+     * 在 node 后面插入新节点
+     */
+    public BPLinkListNode<T> insertAfter(BPLinkListNode<T> node, T val){
+        BPLinkListNode<T> newNode = new BPLinkListNode<>(val);
+        insertAfter(node, newNode);
+        return newNode;
+    }
 
 }

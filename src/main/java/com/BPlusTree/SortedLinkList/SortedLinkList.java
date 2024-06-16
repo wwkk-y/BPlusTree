@@ -38,7 +38,7 @@ public class SortedLinkList<T extends Comparable<T>> {
     /**
      * 在 cur 后面插入新节点, 考虑头尾指针改变和改变大小
      */
-    private void insertAfter(@NonNull SortedLinkListNode<T> cur, SortedLinkListNode<T> newNode){
+    private void insertAfter(@NonNull SortedLinkListNode<T> cur, @NonNull SortedLinkListNode<T> newNode){
         /*
          cur <-> p2
          newNode
@@ -48,16 +48,12 @@ public class SortedLinkList<T extends Comparable<T>> {
         SortedLinkListNode<T> p2 = cur.next;
         // cur -> next -> p2
         cur.next = newNode;
-        if(newNode != null){
-            newNode.next = p2;
-        }
+        newNode.next = p2;
         // cur <- newNode <- p2
         if(p2 != null){
             p2.pre = newNode;
         }
-        if(newNode != null){
-            newNode.pre = cur;
-        }
+        newNode.pre = cur;
 
         // 可能改变了尾指针
         if(tail == cur){
@@ -70,7 +66,7 @@ public class SortedLinkList<T extends Comparable<T>> {
     /**
      * 在 cur 前面插入新节点, 考虑头尾指针改变和改变大小
      */
-    private void insertBefore(@NonNull SortedLinkListNode<T> cur, SortedLinkListNode<T> newNode){
+    private void insertBefore(@NonNull SortedLinkListNode<T> cur, @NonNull SortedLinkListNode<T> newNode){
         /*
          p1 <-> cur
          newNode
@@ -82,14 +78,10 @@ public class SortedLinkList<T extends Comparable<T>> {
         if(p1 != null){
             p1.next = newNode;
         }
-        if(newNode != null){
-            newNode.next = cur;
-        }
+        newNode.next = cur;
         // p1 <- newNode <- cur
         cur.pre = newNode;
-        if(newNode != null){
-            newNode.pre = p1;
-        }
+        newNode.pre = p1;
 
         // 可能是头指针
         if(cur == head){
