@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.BPlusTree.TestUtil.*;
+import static com.BPlusTree.util.TestUtil.*;
 
 public class BPlusTreeTest {
 

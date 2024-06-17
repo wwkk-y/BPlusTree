@@ -19,7 +19,7 @@
 
 这里采取的策略是, 一个父节点对应一个子页面(子节点集合), 父节点的值是子节点里的最大值, 举个例子, 如下
 
-![img.png](./files/img.png)
+![V2.结构.png](files/V2.结构.png)
 > 父界面 parentPage 与子界面 childPage 对应关系:
 > - childPage.parentPage = parentPage
 >  ```java

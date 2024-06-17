@@ -1,6 +1,6 @@
 package com.BPlusTree.V2;
 
-import com.BPlusTree.TestUtil;
+import com.BPlusTree.util.TestUtil;
 import com.BPlusTree.util.RandomGenerator;
 
 import java.util.ArrayList;

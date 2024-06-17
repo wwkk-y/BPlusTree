@@ -4,9 +4,8 @@ import com.BPlusTree.util.RandomGenerator;
 import lombok.NonNull;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
-import static com.BPlusTree.TestUtil.*;
+import static com.BPlusTree.util.TestUtil.*;
 
 public class SortedLinkListTest {
 

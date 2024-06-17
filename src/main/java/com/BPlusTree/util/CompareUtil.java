@@ -44,4 +44,8 @@ public class CompareUtil {
     public static <T extends Comparable<T>> boolean smallEqual(T a, T b) {
         return compare(a, b) <= 0;
     }
+
+    public static <T extends Comparable<T>> boolean notEqual(T a, T b) {
+        return compare(a, b) != 0;
+    }
 }

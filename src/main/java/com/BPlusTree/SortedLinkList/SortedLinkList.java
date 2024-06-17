@@ -267,6 +267,9 @@ public class SortedLinkList<T extends Comparable<T>> {
         return size;
     }
 
+    /**
+     * 转换成list
+     */
     public ArrayList<T> toList(){
         ArrayList<T> result = new ArrayList<>();
 

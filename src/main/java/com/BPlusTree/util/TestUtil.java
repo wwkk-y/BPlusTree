@@ -1,6 +1,5 @@
-package com.BPlusTree;
+package com.BPlusTree.util;
 
-import com.BPlusTree.util.CompareUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
