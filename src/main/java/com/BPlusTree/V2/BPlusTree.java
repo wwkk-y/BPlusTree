@@ -43,16 +43,23 @@ public class BPlusTree<K extends Comparable<K>, V> {
 
     /**
      * 更新
-     * @return 更新成功返回true(有可能key不存在)
+     * @return 更新行数
      */
-    public boolean update(K key, V val){
+    public int update(K key, V val){
         BPlusTreeNode<K, V> treeNode = rootPage.treeSelectNode(key);
         if(treeNode == null){
-            return false;
+            return 0;
         }
-
         treeNode.data = val;
-        return true;
+        return 1;
+    }
+
+    /**
+     * 删除
+     * @return 删除行数
+     */
+    public int delete(K key){
+        return rootPage.treeDelete(key);
     }
 
     /**

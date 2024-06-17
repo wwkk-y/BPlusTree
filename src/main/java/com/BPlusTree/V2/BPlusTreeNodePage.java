@@ -44,18 +44,6 @@ public class BPlusTreeNodePage <K extends Comparable<K>, V> {
     }
 
     /**
-     * 查找 key 对应的值
-     */
-    public V treeSelect(K key){
-        BPlusTreeNode<K, V> node = treeSelectNode(key);
-        if(node == null){
-            return null;
-        }
-
-        return node.data;
-    }
-
-    /**
      * 查找 key 对应的节点
      */
     public BPlusTreeNode<K, V> treeSelectNode(K key){
@@ -76,6 +64,41 @@ public class BPlusTreeNodePage <K extends Comparable<K>, V> {
 
         // 不是叶子节点, 就继续搜索该节点的子节点页
         return leTreeNode.children.treeSelectNode(key);
+    }
+
+    /**
+     * 查找 key 对应的值
+     */
+    public V treeSelect(K key){
+        BPlusTreeNode<K, V> node = treeSelectNode(key);
+        if(node == null){
+            return null;
+        }
+
+        return node.data;
+    }
+
+    /**
+     * 查找 key 所在 page
+     */
+    public BPlusTreeNodePage<K, V> treeSelectPage(K key){
+        // 查找第一个 >= key 的节点
+        BPlusTreeNode<K, V> leTreeNode = nodes.findFirstLeElement(new BPlusTreeNode<>(key));
+        if(leTreeNode == null){
+            return null;
+        }
+
+        // 是叶子节点, 就判断值是不是相等
+        if(leTreeNode.leaf){
+            if(CompareUtil.equal(leTreeNode.key, key)){
+                return this;
+            } else {
+                return null;
+            }
+        }
+
+        // 不是叶子节点, 就继续搜索该节点的子节点页
+        return leTreeNode.children.treeSelectPage(key);
     }
 
     /**
@@ -205,10 +228,10 @@ public class BPlusTreeNodePage <K extends Comparable<K>, V> {
      * @param key 索引
      * @return 删除成功返回true(有可能key不存在)
      */
-    public boolean treeDelete(K key){
+    public int treeDelete(K key){
         BPlusTreeNode<K, V> leTreeNode = nodes.findFirstLeElement(new BPlusTreeNode<>(key));
         if(leTreeNode == null){
-            return false;
+            return 0;
         }
 
         if (!leaf) {
@@ -218,9 +241,23 @@ public class BPlusTreeNodePage <K extends Comparable<K>, V> {
         if(CompareUtil.equal(key, leTreeNode.key)){
             // 为叶子节点且找到了改节点
 
-            return true;
+            return 1;
         }
 
-        return false;
+        return 1;
+    }
+
+    /**
+     * 更新
+     * @return 更新行数
+     */
+    public int treeUpdate(K key, V val) {
+        BPlusTreeNodePage<K, V> page = treeSelectPage(key);
+        if(page == null){
+            return 0;
+        }
+
+
+        return 0;
     }
 }
