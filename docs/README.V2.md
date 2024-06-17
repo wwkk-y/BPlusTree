@@ -79,14 +79,3 @@
    1. true: 尝试在当前页插入新节点, 如果插入成功, 判断是否大于阶数, 大于就分裂当前页(见分裂算法)
    2. false: 在 leTreeNode 的子界面添加数据
 
-### 删除
-> 实现: BPlusTreeNodePage.treeDelete(K key)
-
-在根界面 rootPage 开始尝试删除 key
-1. 在当前页查找第一个 >= key 的节点 leTreeNode ,没找到的话表示节点不存在, 直接返回 false
-2. 如果为非叶子节点, 与 leTreeNode.children 里尝试删除 key
-3. 如果为叶子节点 且 leTreeNode.key == key
-   1. 删除, 如果删除了最大值, 更新索引
-   2. 如果当前节点个数小于 m/2 
-      1. 不为最后一个节点时, 去右边借最小值, 如果右边也不够, 与右边合并
-      2. 为最后一个节点时, 去左边借最大值, 如果左边也不够, 与左边合并

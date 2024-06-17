@@ -19,24 +19,54 @@ public class BPlusTreeTest {
         // 测试插入
         ArrayList<String> keys = new ArrayList<>();
         ArrayList<String> values = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
+        if(unique){
+            // 唯一索引
+            for (int i = 0; i < size; i++) {
 //            Integer key = RandomGenerator.generateRandomNumber(1, Integer.MAX_VALUE);
-            String key = RandomGenerator.generateRandomString(10);
-            String value = RandomGenerator.generateRandomString(5);
-            keys.add(key);
-            values.add(value);
+                String key = RandomGenerator.generateRandomString(10);
+                String value = RandomGenerator.generateRandomString(5);
+                keys.add(key);
+                values.add(value);
 
-            try {
-                bPlusTree.insert(key, value);
-            } catch (NullPointerException e){
-                bPlusTree.check(true, keys, values, false);
-                System.out.println("keys:" + keys);
-                System.out.println("key: " + key);
-                throw e;
+                try {
+                    bPlusTree.insert(key, value);
+                } catch (NullPointerException e){
+                    bPlusTree.check(true, keys, values, false);
+                    System.out.println("keys:" + keys);
+                    System.out.println("key: " + key);
+                    throw e;
+                }
+
+            }
+        }
+        if(!unique){
+            // 测试非唯一索引, 插入多条重复数据
+            int keySetSize = size / 100 + 1;
+            for (int i = 0; i < keySetSize; i++) {
+//            Integer key = RandomGenerator.generateRandomNumber(1, Integer.MAX_VALUE);
+                String key = RandomGenerator.generateRandomString(10);
+                String value = RandomGenerator.generateRandomString(5);
+                keys.add(key);
+                values.add(value);
+            }
+            for (int i = keySetSize; i < size; i++) {
+                keys.add(keys.get(i - keySetSize));
+                values.add(values.get(i - keySetSize));
+            }
+
+            for (int i = 0; i < keys.size(); i++) {
+                try {
+                    bPlusTree.insert(keys.get(i), values.get(i));
+                } catch (NullPointerException e){
+                    bPlusTree.check(true, keys, values, false);
+                    System.out.println("keys:" + keys);
+                    System.out.println("key: " + keys.get(i));
+                    throw e;
+                }
             }
 
         }
-        bPlusTree.check(false, keys, values);
+        bPlusTree.check(true, keys, values);
         System.out.println("test insert success");
 
         // 测试其他的
@@ -52,12 +82,31 @@ public class BPlusTreeTest {
     public static void testSelect(BPlusTree<String, String> bPlusTree, ArrayList<String> keys, ArrayList<String> values){
         for (int i = 0; i < keys.size(); i++) {
             ArrayList<String> valueList = bPlusTree.select(keys.get(i));
-            if(valueList.size() == 0 || valueList.get(0) != values.get(i)){
-                System.out.println(keys);
-                System.out.println(values);
-                System.out.println(keys.get(i));
-                System.out.println(valueList);
-                throw new RuntimeException("查找错误");
+            if(bPlusTree.unique){
+                if(valueList.size() != 1 || valueList.get(0) != values.get(i)){
+                    System.out.println(keys);
+                    System.out.println(values);
+                    System.out.println(keys.get(i));
+                    System.out.println(valueList);
+                    throw new RuntimeException("查找错误");
+                }
+            } else {
+                if(valueList.size() == 0){
+                    System.out.println(keys);
+                    System.out.println(values);
+                    System.out.println(keys.get(i));
+                    System.out.println(valueList);
+                    throw new RuntimeException("查找错误");
+                }
+                for (String value : valueList) {
+                    if(!value.equals(values.get(i))){
+                        System.out.println(keys);
+                        System.out.println(values);
+                        System.out.println(keys.get(i));
+                        System.out.println(valueList);
+                        throw new RuntimeException("查找错误");
+                    }
+                }
             }
         }
         for (int i = 0; i < 100; i++) {
@@ -94,7 +143,7 @@ public class BPlusTreeTest {
         System.out.println("test update success");
     }
 
-    public static void main(String[] args) {
+    public static void testmMain(String[] args) {
         // 测试一层插入
         for (int i = 0; i < 10; i++) {
             int degree = RandomGenerator.generateRandomNumber(1, 10);
@@ -122,5 +171,11 @@ public class BPlusTreeTest {
             }
         }
         System.out.println("done!");
+    }
+
+    public static void main(String[] args) {
+        for (int i = 0; i < 1000; i++) {
+            testmMain(args);
+        }
     }
 }

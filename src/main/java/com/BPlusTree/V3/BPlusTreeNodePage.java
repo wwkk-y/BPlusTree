@@ -59,7 +59,26 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
         if(!leaf){
             // 不为叶子节点, 继续搜索
             return leNode.getData().children.treeFindFirstLENode(key);
-        } else if(CompareUtil.equal(key, leNode.getData().key)){
+        }
+
+        return leNode;
+    }
+
+    /**
+     * 在树结构里查找第一个 =key 的链表节点
+     * @param key 索引
+     * @return 链表节点
+     */
+    public SortedLinkListNode<BPlusTreeNode<K, V>> treeFindFirstEqualNode(K key){
+        // 查找第一个大于等 key 的索引
+        SortedLinkListNode<BPlusTreeNode<K, V>> leNode = treeFindFirstLENode(key);
+        if(leNode == null){
+            // 没找到, 说明不存在
+            return null;
+        }
+
+        // 相等时返回节点
+        if(CompareUtil.equal(key, leNode.getData().key)){
             return leNode;
         }
 
@@ -71,27 +90,21 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
      * @return 没有数据时返回空数组
      */
     public ArrayList<V> treeSelect(K key) {
-        // 查找第一个大于等 key 的索引
-        SortedLinkListNode<BPlusTreeNode<K, V>> leNode = treeFindFirstLENode(key);
-        if(leNode == null){
+        // 查找第一个等于 key 的索引
+        SortedLinkListNode<BPlusTreeNode<K, V>> eNode = treeFindFirstEqualNode(key);
+        if(eNode == null){
             return new ArrayList<>();
         }
         // 位于叶子节点链表里的节点位置
-        SortedLinkListNode<BPlusTreeNode<K, V>> leLeafNode = leNode.getData().leafTreeNode;
+        SortedLinkListNode<BPlusTreeNode<K, V>> eLeafNode = eNode.getData().leafTreeNode;
 
-        // key 不相等
-        if(CompareUtil.notEqual(key, leLeafNode.getData().key)){
-            return new ArrayList<>();
-        }
-
-        // 为叶子节点且找到了
         ArrayList<V> result = new ArrayList<>();
         if(bPlusTree.unique){
             // 为唯一索引时直接返回这一条数据
-            result.add(leLeafNode.getData().data);
+            result.add(eLeafNode.getData().data);
         } else {
             // 不为唯一索引时需要扫描多行数据
-            SortedLinkListNode<BPlusTreeNode<K, V>> curLeafNode = leLeafNode;
+            SortedLinkListNode<BPlusTreeNode<K, V>> curLeafNode = eLeafNode;
             while(curLeafNode != null && CompareUtil.equal(curLeafNode.getData().key, key)){
                 result.add(curLeafNode.getData().data);
                 curLeafNode = curLeafNode.getNext();
@@ -248,27 +261,24 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
      * @return 更新行数
      */
     public int treeUpdate(K key, V newVal) {
-        // 查找第一个 >=key 的节点在叶子节点链表里该节点的位置
-        SortedLinkListNode<BPlusTreeNode<K, V>> leLeafNode = treeFindFirstLENode(key);
-        if(leLeafNode == null){
+        // 查找第一个等于 key 的索引
+        SortedLinkListNode<BPlusTreeNode<K, V>> eNode = treeFindFirstEqualNode(key);
+        if(eNode == null){
             return 0;
         }
-
-        // key 不相等
-        if(CompareUtil.notEqual(key, leLeafNode.getData().key)){
-            return 0;
-        }
+        // 位于叶子节点链表里的节点位置
+        SortedLinkListNode<BPlusTreeNode<K, V>> eLeafNode = eNode.getData().leafTreeNode;
 
         int result = 0;
         if(bPlusTree.unique){
             // 为唯一索引时直接返回这一条数据
-            leLeafNode.getData().data = newVal;
+            eLeafNode.getData().data = newVal;
             result += 1;
         } else {
             // 不为唯一索引时需要扫描多行数据
-            SortedLinkListNode<BPlusTreeNode<K, V>> curLeafNode = leLeafNode;
+            SortedLinkListNode<BPlusTreeNode<K, V>> curLeafNode = eLeafNode;
             while(curLeafNode != null && CompareUtil.equal(curLeafNode.getData().key, key)){
-                leLeafNode.getData().data = newVal;
+                eLeafNode.getData().data = newVal;
                 result += 1;
 
                 curLeafNode = curLeafNode.getNext();
@@ -284,19 +294,39 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
      * @return 删除行数
      */
     public int treeDelete(K key){
-        SortedLinkListNode<BPlusTreeNode<K, V>> leNode = treeFindFirstLENode(key);
-        if(leNode == null){
-            return 0;
-        }
-
         if(bPlusTree.unique){
-
+            return uniqueTreeDelete(key);
         } else {
-            // 现在当前页尝试删除
+            // 查找第一个等于 key 的索引
+            SortedLinkListNode<BPlusTreeNode<K, V>> eNode = treeFindFirstEqualNode(key);
+            if(eNode == null){
+                return 0;
+            }
+            // 位于叶子节点链表里的节点位置
+            SortedLinkListNode<BPlusTreeNode<K, V>> leLeafNode = eNode.getData().leafTreeNode;
 
-            // 为0, 父节点删除索引
+            // 逻辑删除
+            int result = 0;
+            // 需要扫描多行数据
+            SortedLinkListNode<BPlusTreeNode<K, V>> curLeafNode = leLeafNode;
+            while(curLeafNode != null && CompareUtil.equal(curLeafNode.getData().key, key)){
+                leLeafNode.getData().deleted = true;
+                result += 1;
 
-            // 如果到了末尾, 继续删除下一页
+                curLeafNode = curLeafNode.getNext();
+            }
+            return result;
+        }
+    }
+
+    /**
+     * 删除唯一索引树结构里索引为 key 的节点
+     * @param key 索引
+     * @return 删除行数
+     */
+    private int uniqueTreeDelete(K key) {
+        if(!bPlusTree.unique){
+            throw new RuntimeException("不为唯一索引");
         }
 
         return 0;
