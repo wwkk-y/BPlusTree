@@ -30,8 +30,10 @@ public class TestUtil {
      * 判断两个数组包含的元素是否相同
      */
     public static <T extends Comparable<T>> boolean isArrayElementEqual(List<T> list1, List<T> list2){
-        list1.sort(CompareUtil::compare);
-        list2.sort(CompareUtil::compare);
-        return Arrays.equals(list1.toArray(), list2.toArray());
+        ArrayList<T> sortedList1 = new ArrayList<>(list1);
+        ArrayList<T> sortedList2 = new ArrayList<>(list2);
+        sortedList1.sort(CompareUtil::compare);
+        sortedList2.sort(CompareUtil::compare);
+        return Arrays.equals(sortedList1.toArray(), sortedList2.toArray());
     }
 }
