@@ -1,8 +1,11 @@
 package com.BPlusTree.SortedLinkList;
 
+import lombok.Data;
+
 /**
  * 有序的双向链表节点
  */
+@Data
 public class SortedLinkListNode <T extends Comparable<T>>{
     SortedLinkListNode<T> pre;
     T data;
@@ -16,9 +19,5 @@ public class SortedLinkListNode <T extends Comparable<T>>{
         this.pre = pre;
         this.data = data;
         this.next = next;
-    }
-
-    public T getData(){
-        return data;
     }
 }

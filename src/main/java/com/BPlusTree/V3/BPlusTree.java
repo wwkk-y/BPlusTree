@@ -42,6 +42,16 @@ public class BPlusTree<K extends Comparable<K>, V> {
     }
 
     /**
+     * 更新数据
+     * @param key 索引
+     * @param newVal 新值
+     * @return 更新的行
+     */
+    public int update(K key, V newVal){
+        return rootPage.treeUpdate(key, newVal);
+    }
+
+    /**
      * 测试方法, 广度优先遍历检查节点有没有问题
      * @param out 为 true 时输出
      * @param insertedKeys 插入的key

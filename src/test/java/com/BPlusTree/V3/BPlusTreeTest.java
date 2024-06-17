@@ -41,8 +41,9 @@ public class BPlusTreeTest {
 
         // 测试其他的
         testSelect(bPlusTree, keys, values);
+        testUpdate(bPlusTree, keys, values);
 
-        TestUtil.hr(100);
+        TestUtil.hr();
     }
 
     /**
@@ -59,7 +60,38 @@ public class BPlusTreeTest {
                 throw new RuntimeException("查找错误");
             }
         }
+        for (int i = 0; i < 100; i++) {
+            ArrayList<String> valueList = bPlusTree.select(RandomGenerator.generateRandomString(5));
+            if(valueList.size() != 0){
+                System.out.println(valueList);
+                throw new RuntimeException("查找错误");
+            }
+        }
+        ArrayList<String> valueList = bPlusTree.select(null);
+        if(valueList.size() != 0){
+            System.out.println(valueList);
+            throw new RuntimeException("查找错误");
+        }
         System.out.println("test select success");
+    }
+
+    /**
+     * 测试更新
+     */
+    public static void testUpdate(BPlusTree<String, String> bPlusTree, ArrayList<String> keys, ArrayList<String> values){
+        for (int i = 0; i < keys.size(); i++) {
+            values.set(i, RandomGenerator.generateRandomString(5));
+            bPlusTree.update(keys.get(i), values.get(i));
+            ArrayList<String> valueList = bPlusTree.select(keys.get(i));
+            if(valueList.size() == 0 || valueList.get(0) != values.get(i)){
+                System.out.println(keys);
+                System.out.println(values);
+                System.out.println(keys.get(i));
+                System.out.println(valueList);
+                throw new RuntimeException("更新错误");
+            }
+        }
+        System.out.println("test update success");
     }
 
     public static void main(String[] args) {
@@ -69,15 +101,24 @@ public class BPlusTreeTest {
             for (int j = 0; j < 10; j++) {
                 int size = RandomGenerator.generateRandomNumber(1, degree);
                 System.out.printf("degree: %d, size: %d \n", degree, size);
+                System.out.println("unique");
                 test(degree, true, size);
+                System.out.println("not unique");
+                test(degree, false, size);
+                TestUtil.hr(100);
             }
         }
         // 测试多层插入
         for (int i = 3; i < 1000; i *= 2) {
             for (int j = i - 1;  j < 100000; j *= 3) {
                 System.out.printf("degree: %d, size: %d \n", i, j);
-                test(i, true, j);
                 TestUtil.hr();
+                System.out.println("unique");
+                test(i, true, j);
+                System.out.println("not unique");
+                test(i, false, j);
+                TestUtil.hr();
+                TestUtil.hr(100);
             }
         }
         System.out.println("done!");
