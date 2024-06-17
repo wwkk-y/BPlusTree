@@ -44,24 +44,23 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
     }
 
     /**
-     * 查找第一个 >=key 的节点, 返回叶子节点链表里该节点的位置
-     * 查找第一个 >=key 的节点在叶子节点链表里该节点的位置
+     * 在树结构里查找第一个 >=key 的链表节点
      * @param key 索引
-     * @return 叶子节点链表里该节点的位置
+     * @return 链表节点
      */
-    public SortedLinkListNode<BPlusTreeNode<K, V>> findFirstLELeafNode(K key){
+    public SortedLinkListNode<BPlusTreeNode<K, V>> treeFindFirstLENode(K key){
         // 查找第一个大于等 key 的索引
-        BPlusTreeNode<K, V> leKeyNode = nodes.findFirstLeElement(new BPlusTreeNode<>(bPlusTree, key));
-        if(leKeyNode == null){
+        SortedLinkListNode<BPlusTreeNode<K, V>> leNode = nodes.findFirstLeNode(new BPlusTreeNode<>(bPlusTree, key));
+        if(leNode == null){
             // 没找到, 说明不存在
             return null;
         }
 
         if(!leaf){
             // 不为叶子节点, 继续搜索
-            return leKeyNode.children.findFirstLELeafNode(key);
-        } else if(CompareUtil.equal(key, leKeyNode.key)){
-            return leKeyNode.leafTreeNode;
+            return leNode.getData().children.treeFindFirstLENode(key);
+        } else if(CompareUtil.equal(key, leNode.getData().key)){
+            return leNode;
         }
 
         return null;
@@ -72,11 +71,13 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
      * @return 没有数据时返回空数组
      */
     public ArrayList<V> treeSelect(K key) {
-        // 查找第一个大于等 key 的索引 位于叶子节点链表里的节点位置
-        SortedLinkListNode<BPlusTreeNode<K, V>> leLeafNode = findFirstLELeafNode(key);
-        if(leLeafNode == null){
+        // 查找第一个大于等 key 的索引
+        SortedLinkListNode<BPlusTreeNode<K, V>> leNode = treeFindFirstLENode(key);
+        if(leNode == null){
             return new ArrayList<>();
         }
+        // 位于叶子节点链表里的节点位置
+        SortedLinkListNode<BPlusTreeNode<K, V>> leLeafNode = leNode.getData().leafTreeNode;
 
         // key 不相等
         if(CompareUtil.notEqual(key, leLeafNode.getData().key)){
@@ -240,7 +241,6 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
         return true;
     }
 
-
     /**
      * 在树结构里更新 key 对应的所有值
      * @param key 索引
@@ -249,7 +249,7 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
      */
     public int treeUpdate(K key, V newVal) {
         // 查找第一个 >=key 的节点在叶子节点链表里该节点的位置
-        SortedLinkListNode<BPlusTreeNode<K, V>> leLeafNode = findFirstLELeafNode(key);
+        SortedLinkListNode<BPlusTreeNode<K, V>> leLeafNode = treeFindFirstLENode(key);
         if(leLeafNode == null){
             return 0;
         }
@@ -276,5 +276,29 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
         }
 
         return result;
+    }
+
+    /**
+     * 删除树结构里索引为 key 的节点
+     * @param key 索引
+     * @return 删除行数
+     */
+    public int treeDelete(K key){
+        SortedLinkListNode<BPlusTreeNode<K, V>> leNode = treeFindFirstLENode(key);
+        if(leNode == null){
+            return 0;
+        }
+
+        if(bPlusTree.unique){
+
+        } else {
+            // 现在当前页尝试删除
+
+            // 为0, 父节点删除索引
+
+            // 如果到了末尾, 继续删除下一页
+        }
+
+        return 0;
     }
 }
