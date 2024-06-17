@@ -1,4 +1,4 @@
-# 基于 Java 实现的 B+ 树
+# 一步一步实现数据库应用级 B+ 树(Java)
 > 参考文献:
 > - [B+树详解](https://ivanzz1001.github.io/records/post/data-structure/2018/06/16/ds-bplustree)
 > - [数据结构合集 - B+树](https://www.bilibili.com/video/BV1bs421u7pY/)

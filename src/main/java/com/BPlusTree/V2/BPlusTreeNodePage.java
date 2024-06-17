@@ -199,4 +199,28 @@ public class BPlusTreeNodePage <K extends Comparable<K>, V> {
 
         return true;
     }
+
+    /**
+     * 删除 key 对应的元素
+     * @param key 索引
+     * @return 删除成功返回true(有可能key不存在)
+     */
+    public boolean treeDelete(K key){
+        BPlusTreeNode<K, V> leTreeNode = nodes.findFirstLeElement(new BPlusTreeNode<>(key));
+        if(leTreeNode == null){
+            return false;
+        }
+
+        if (!leaf) {
+            return leTreeNode.children.treeDelete(key);
+        }
+
+        if(CompareUtil.equal(key, leTreeNode.key)){
+            // 为叶子节点且找到了改节点
+
+            return true;
+        }
+
+        return false;
+    }
 }
