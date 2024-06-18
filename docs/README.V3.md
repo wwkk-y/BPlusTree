@@ -1,4 +1,4 @@
-# V2版本
+# V3版本
 > - 源码位置: src/main/com/BPlusTree/V3
 > - 测试文件位置: test/java/com/BPlusTree/V3
 
@@ -60,9 +60,15 @@
 ### 删除
 
 在当前页开始尝试删除键 key 对应的值
-1. 在当前页查找第一个 >= key 的节点 leNode
-2. 如果为叶子页
-   1. 如果 leNode 为
+1. 在当前页查找第一个索引 >= key 的节点 leNode
+2. 如果 leNode 为 null, 没找到, 直接 return
+3. 如果当前页为叶子页
+   1. 判断 leNode.key == key, 不满足 return
+   2. 从 leNode 开始删除索引为 key 的节点 eNode
+      1. 维护叶子链表: 叶子链表里直接删除这个节点
+      2. 删除 eNode, 如果当前页节点个数小于 m/2, 先尝试去右边要一个节点, 如果右边也不够, 就和右边合并成一个界面, 见合并算法
+          > 如果当前页没有右边页, 去左边借
+4. 如果当前页不为叶子页, 去子页 leNode.children 继续尝试删除
 
 
 ### 分裂算法
@@ -71,15 +77,21 @@
 > 条件: 页面的阶数 > 阶数
 1. 为根页, 分裂成两个子页, 根页面设置两个字页索引
 2. 不为根页, 分裂成两个页, 父页面新添加一个索引, 如果父页面节点数也超出阶数, 继续分裂父页面
-> 注意需要更新 
-> 1. page.parentPage, 
-> 2. page.parentKeyNode
-> 3. node.children
-> 4. node.children -> 是一个 page(更新 1, 2)
 
-### 合并算法
+### 拓展 |合并算法
 
-将两个页面 leftPage 和 rightPage 合并成一个界面
+将当前页拓展到节点个数 >= 阶数/2
 > 条件:
 > 1. 两个页面的阶数和 <= 阶数
 > 2. 两个页面的父页面相同
+
+## 父子节点关系
+
+current 表示当前页, parent 表示父页
+1. current.parentPage = parent, 
+2. current.parentKeyNode in parent.nodes // 索引
+3. current.parentKeyTreeNode.children = parent // 索引节点子页面
+4. 如果 current 不是叶子, 对于 current.nodes: 
+   - node.children -> current 是 node.children 的父界面, 对 node.children 进行第 1, 2, 3步
+   - node.page = current // 所属页
+   - node.keyListNode in current.nodes // 索引链表节点
