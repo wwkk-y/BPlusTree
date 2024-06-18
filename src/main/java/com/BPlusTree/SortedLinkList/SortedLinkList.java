@@ -2,8 +2,10 @@ package com.BPlusTree.SortedLinkList;
 
 import com.BPlusTree.BPLinkList.BPLinkListNode;
 import com.BPlusTree.util.CompareUtil;
+import lombok.Getter;
 import lombok.NonNull;
 
+import javax.xml.soap.Node;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
@@ -11,8 +13,11 @@ import java.util.function.Consumer;
  * 有序双向链表
  */
 public class SortedLinkList<T extends Comparable<T>> {
+    @Getter
     private SortedLinkListNode<T> head;
+    @Getter
     private SortedLinkListNode<T> tail;
+    @Getter
     private long size;
     private final boolean unique; // 元素是否唯一, 唯一的时候不能出现重复值
 
@@ -94,9 +99,9 @@ public class SortedLinkList<T extends Comparable<T>> {
     }
 
     /**
-     * 移除节点, 考虑头尾指针改变和改变大小
+     * 移除节点, 考虑头尾指针改变和改变大小, 不会改变 node 的 pre 和 next
      */
-    private void removeNode(@NonNull SortedLinkListNode<T> node) {
+    public void removeNode(@NonNull SortedLinkListNode<T> node) {
         /*
             p1 <-> node <-> p2
             改成
@@ -263,10 +268,6 @@ public class SortedLinkList<T extends Comparable<T>> {
         return null;
     }
 
-    public long getSize() {
-        return size;
-    }
-
     /**
      * 转换成list
      */
@@ -356,27 +357,45 @@ public class SortedLinkList<T extends Comparable<T>> {
     /**
      * 在尾部添加一个值, 要求插入值保证原链表有序, 否则抛出异常
      * @return 返回插入元素所在节点
-     * @throws DisorderedException 新元素 < 最大值时抛出
+     * @throws DisorderedException 不满足排序顺序时抛出
      */
     public SortedLinkListNode<T> pushBack(T val) throws DisorderedException {
         // tail -> NULL
         // tail <-> newNode -> NULL
         SortedLinkListNode<T> newNode = new SortedLinkListNode<>(val);
+        return pushBack(newNode);
+    }
+
+    /**
+     * 在尾部添加一个节点, 要求插入值保证原链表有序, 否则抛出异常
+     * @return 返回插入元素所在节点
+     * @throws DisorderedException 不满足排序顺序时抛出
+     */
+    public SortedLinkListNode<T> pushBack(@NonNull SortedLinkListNode<T> newNode) throws DisorderedException {
         if(tail == null){
             init(newNode);
         } else {
             // 判断大小 和 唯一
-            if(CompareUtil.large(tail.data, val)){
-                throw new DisorderedException("尾部插入的元素小于最大值: " + tail.data + " < " + val);
+            if(CompareUtil.large(tail.data, newNode.data)){
+                throw new DisorderedException("尾部插入的元素小于最大值: " + tail.data + " < " + newNode.data);
             }
-            if(unique && CompareUtil.equal(tail.data, val)){
+            if(unique && CompareUtil.equal(tail.data, newNode.data)){
                 throw new RepeatValueException("不能插入重复的元素");
             }
             insertAfter(tail, newNode);
             tail = newNode;
         }
-
         return newNode;
+    }
+
+    /**
+     * 删除头部元素
+     * @return 删除的元素节点
+     */
+    public SortedLinkListNode<T> popFront(){
+        SortedLinkListNode<T> delNode = head;
+        removeNode(head);
+        return delNode;
     }
 
     /**
@@ -399,5 +418,37 @@ public class SortedLinkList<T extends Comparable<T>> {
             action.accept(p.data);
             p = p.next;
         }
+    }
+
+    /**
+     * 合并list, list合并到右边
+     */
+    public void merge(SortedLinkList<T> list) throws DisorderedException {
+        if(list.unique != unique){
+            throw new RuntimeException("不同类型链表不可合并");
+        }
+        if(list.size == 0){
+            return;
+        }
+
+        size += list.getSize();
+        if(head == null){
+            head = list.head;
+        } else {
+            // 检查有序性
+            if(CompareUtil.large(tail.data, list.head.data)){
+                throw new DisorderedException();
+            }
+            // 检查唯一约束
+            if(unique && CompareUtil.equal(tail.data, list.head.data)){
+                throw new RepeatValueException();
+            }
+            // ... tail -> NULL, NULL <- head ...
+            // ... tail <-> head ...
+            tail.next = list.head;
+            list.head.pre = tail;
+        }
+        // 更新 tail
+        tail = list.tail;
     }
 }

@@ -239,7 +239,36 @@ public class SortedLinkListTest {
         System.out.println(o);
     }
 
+    public static void testMerge(int size1, int size2){
+        SortedLinkList<String> left = generateStrList(size1);
+        SortedLinkList<String> right = new SortedLinkList<>(false);
+        String prefix = "";
+        if(left.getSize() > 0){
+            prefix = left.lastElement();
+        }
+        for (int i = 0; i < size2; i++) {
+            String val = prefix + RandomGenerator.generateRandomString(20);
+            SortedLinkListNode<String> node = right.insert(val);
+            if(node.getData().compareTo(val) != 0){
+                throw new RuntimeException("插入数据不对");
+            }
+        }
+        try {
+            left.merge(right);
+        } catch (DisorderedException e) {
+            throw new RuntimeException(e);
+        }
+        if(left.getSize() != size1 + size2){
+            throw new RuntimeException("大小错误: " + left.getSize() + " - " + (size1 + size2));
+        }
+        ArrayList<String> leftArray = left.toList();
+        ArrayList<String> rightArray = right.toList();
+        System.out.println(leftArray);
+        System.out.println(rightArray);
+    }
+
     public static void main(String[] args) {
+
         try {
             testNull(null);
         } catch (NullPointerException e){
@@ -252,6 +281,9 @@ public class SortedLinkListTest {
                 testInsert(3000);
                 testSearch(3000);
                 testDelete(3000);
+                testMerge(0, 100);
+                testMerge(100, 0);
+                testMerge(100, 100);
             } catch (RepeatValueException e){
                 e.printStackTrace();
             }
