@@ -12,7 +12,6 @@ public class BPlusTreeNode<K extends Comparable<K>, V> implements Comparable<BPl
     boolean leaf; // 是否为叶子
     BPlusTreeNodePage<K, V> children; // 子节点页
     V data; // 数据节点, 为叶子时才有
-    boolean deleted; // 逻辑删除字段
     SortedLinkListNode<BPlusTreeNode<K, V>> leafTreeNode; // 所在叶子节点链表 Node, 为叶子节点时才有
 
     BPlusTreeNode(BPlusTree<K, V> bPlusTree, K key){

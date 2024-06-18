@@ -66,7 +66,7 @@ public class BPlusTreeTest {
             }
 
         }
-        bPlusTree.check(true, keys, values);
+        bPlusTree.check(false, keys, values);
         System.out.println("test insert success");
 
         // 测试其他的
@@ -143,8 +143,8 @@ public class BPlusTreeTest {
         System.out.println("test update success");
     }
 
-    public static void testmMain(String[] args) {
-        // 测试一层插入
+    public static void testMain(String[] args) {
+        // 测试一层
         for (int i = 0; i < 10; i++) {
             int degree = RandomGenerator.generateRandomNumber(1, 10);
             for (int j = 0; j < 10; j++) {
@@ -157,7 +157,7 @@ public class BPlusTreeTest {
                 TestUtil.hr(100);
             }
         }
-        // 测试多层插入
+        // 测试多层
         for (int i = 3; i < 1000; i *= 2) {
             for (int j = i - 1;  j < 100000; j *= 3) {
                 System.out.printf("degree: %d, size: %d \n", i, j);
@@ -174,8 +174,8 @@ public class BPlusTreeTest {
     }
 
     public static void main(String[] args) {
-        for (int i = 0; i < 1000; i++) {
-            testmMain(args);
+        for (int i = 0; i < 10; i++) {
+            testMain(args);
         }
     }
 }

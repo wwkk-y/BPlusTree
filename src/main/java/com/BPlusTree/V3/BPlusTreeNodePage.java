@@ -294,41 +294,9 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
      * @return 删除行数
      */
     public int treeDelete(K key){
-        if(bPlusTree.unique){
-            return uniqueTreeDelete(key);
-        } else {
-            // 查找第一个等于 key 的索引
-            SortedLinkListNode<BPlusTreeNode<K, V>> eNode = treeFindFirstEqualNode(key);
-            if(eNode == null){
-                return 0;
-            }
-            // 位于叶子节点链表里的节点位置
-            SortedLinkListNode<BPlusTreeNode<K, V>> leLeafNode = eNode.getData().leafTreeNode;
-
-            // 逻辑删除
-            int result = 0;
-            // 需要扫描多行数据
-            SortedLinkListNode<BPlusTreeNode<K, V>> curLeafNode = leLeafNode;
-            while(curLeafNode != null && CompareUtil.equal(curLeafNode.getData().key, key)){
-                leLeafNode.getData().deleted = true;
-                result += 1;
-
-                curLeafNode = curLeafNode.getNext();
-            }
-            return result;
-        }
-    }
-
-    /**
-     * 删除唯一索引树结构里索引为 key 的节点
-     * @param key 索引
-     * @return 删除行数
-     */
-    private int uniqueTreeDelete(K key) {
-        if(!bPlusTree.unique){
-            throw new RuntimeException("不为唯一索引");
-        }
+        //
 
         return 0;
     }
+
 }
