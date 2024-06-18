@@ -44,9 +44,9 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
     }
 
     /**
-     * 在树结构里查找第一个 >=key 的链表节点
+     * 在树结构里查找第一个 >=key 的索引链表节点
      * @param key 索引
-     * @return 链表节点
+     * @return 索引链表节点
      */
     public SortedLinkListNode<BPlusTreeNode<K, V>> treeFindFirstLENode(K key){
         // 查找第一个大于等 key 的索引
@@ -122,7 +122,7 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
         // 寻找当前页大于等于 key 的最大索引
         SortedLinkListNode<BPlusTreeNode<K, V>> leTreeNode = nodes.findFirstLeNode(new BPlusTreeNode<>(bPlusTree, key));
         if(leaf){
-            BPlusTreeNode<K, V> newTreeNode = new BPlusTreeNode<>(bPlusTree, key, val);
+            BPlusTreeNode<K, V> newTreeNode = new BPlusTreeNode<>(bPlusTree, key, val, this);
             if(leTreeNode == null){
                 try {
                     // 维护叶子链表 bPlusTree.leafTreeNodeList
@@ -138,7 +138,7 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
                     }
 
                     // 当前节点页插入数据
-                    nodes.pushBack(newTreeNode);
+                    newTreeNode.keyListNode = nodes.pushBack(newTreeNode);
                 } catch (DisorderedException e) {
                     bPlusTree.check(true);
                     System.out.printf("insert: %s\n", newTreeNode);
@@ -146,15 +146,14 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
                 }
             } else {
                 try {
-                    BPlusTreeNode<K, V> newNode = new BPlusTreeNode<>(bPlusTree, key, val);
                     // 维护叶子链表 bPlusTree.leafTreeNodeList
-                    newNode.leafTreeNode = bPlusTree.leafTreeNodeList.insertBefore(
+                    newTreeNode.leafTreeNode = bPlusTree.leafTreeNodeList.insertBefore(
                             leTreeNode.getData().leafTreeNode,
-                            newNode
+                            newTreeNode
                     );
 
                     // 当前节点页插入数据
-                    nodes.insertBefore(leTreeNode, newNode);
+                    newTreeNode.keyListNode = nodes.insertBefore(leTreeNode, newTreeNode);
                 } catch (DisorderedException e) {
                     bPlusTree.check(true);
                     System.out.printf("insert: %s\n", newTreeNode);
@@ -198,16 +197,19 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
             // 设置索引
             // 子节点父节点相互绑定
             BPlusTreeNode<K, V> leftMaxNode = leftPage.nodes.lastElement();
-            BPlusTreeNode<K, V> leftKeyNode = new BPlusTreeNode<>(bPlusTree, leftMaxNode.key, leftPage);
+            BPlusTreeNode<K, V> leftKeyNode = new BPlusTreeNode<>(bPlusTree, leftMaxNode.key, leftPage, this);
 
             BPlusTreeNode<K, V> rightMaxNode = rightPage.nodes.lastElement();
-            BPlusTreeNode<K, V> rightKeyNode = new BPlusTreeNode<>(bPlusTree, rightMaxNode.key, rightPage);
+            BPlusTreeNode<K, V> rightKeyNode = new BPlusTreeNode<>(bPlusTree, rightMaxNode.key, rightPage, this);
             try {
                 leftPage.parentKeyNode = nodes.pushBack(leftKeyNode);
                 rightPage.parentKeyNode = nodes.pushBack(rightKeyNode);
             } catch (DisorderedException e) {
                 throw new RuntimeException(e);
             }
+            // 节点添加索引指针
+            leftKeyNode.keyListNode = leftPage.parentKeyNode;
+            rightKeyNode.keyListNode = rightPage.parentKeyNode;
 
             if(leaf){
                 // 设置为非叶子节点
@@ -221,6 +223,13 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
                     node.children.parentPage = rightPage;
                 });
             }
+            // 需要更换节点所属界面
+            leftPage.nodes.forEach(node -> {
+                node.page = leftPage;
+            });
+            rightPage.nodes.forEach(node -> {
+                node.page = rightPage;
+            });
         } else {
             // 不为根界面直接把右边分裂出来
             SortedLinkList<BPlusTreeNode<K, V>> rightList = nodes.midSplit();
@@ -230,7 +239,7 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
 
             BPlusTreeNodePage<K, V> rightPage = new BPlusTreeNodePage<>(bPlusTree, leaf, rightList, parentPage);
             BPlusTreeNode<K, V> rightMaxNode = rightPage.nodes.lastElement();
-            BPlusTreeNode<K, V> rightKeyNode = new BPlusTreeNode<>(bPlusTree, rightMaxNode.key, rightPage);
+            BPlusTreeNode<K, V> rightKeyNode = new BPlusTreeNode<>(bPlusTree, rightMaxNode.key, rightPage, parentPage);
 
             // 父界面添加索引
             try {
@@ -239,6 +248,8 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
             } catch (DisorderedException e) {
                 throw new RuntimeException(e);
             }
+            // 节点添加索引指针
+            rightKeyNode.keyListNode = rightPage.parentKeyNode;
 
             // 不为叶子界面时需要更新 children
             if(!leaf){
@@ -246,6 +257,10 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
                     node.children.parentPage = rightPage;
                 });
             }
+            // 需要更换节点所属界面
+            rightPage.nodes.forEach(node -> {
+                node.page = rightPage;
+            });
 
             // 因为父页面节点增加, 尝试分裂
             parentPage.trySplit();
@@ -294,9 +309,110 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
      * @return 删除行数
      */
     public int treeDelete(K key){
-        //
+        SortedLinkListNode<BPlusTreeNode<K, V>> leNode = nodes.findFirstLeNode(new BPlusTreeNode<>(bPlusTree, key));
+        if(leNode == null){
+            return 0;
+        }
+
+        if(leaf){
+            if(CompareUtil.notEqual(leNode.getData().key, key)){
+                return 0;
+            }
+
+            SortedLinkListNode<BPlusTreeNode<K, V>> leNodePre = leNode.getPre();
+            while (true){
+                SortedLinkListNode<BPlusTreeNode<K, V>> eNode;
+                if(leNodePre == null){
+                    eNode = nodes.getHead();
+                } else {
+                    eNode = leNodePre.getNext();
+                }
+                if(eNode == null || CompareUtil.notEqual(eNode.getData().key, key)){
+                    break;
+                }
+
+                // 开始删除当前页满足要求的节点
+                while(eNode != null && CompareUtil.equal(eNode.getData().key, key)){
+                    bPlusTree.leafTreeNodeList.removeNode(eNode.getData().leafTreeNode);
+                    nodes.removeNode(eNode);
+                    eNode = eNode.getNext(); 
+                }
+
+                if(eNode == null){
+                    // 当前页没有删完, 下一页继续删
+                }
+
+                // 节点数小于 degree/2 时尝试拓展节点个数
+                if(parentPage != null){
+                    // 非根节点
+                    if(eNode == null){
+                        // 删除了最后一个节点, 需要更新父节点索引
+                        if(leNodePre == null){
+                            // 如果 leNodePre 也为 null, 表示当前页所以数据都删了, 删除父索引
+                            parentPage.nodes.removeNode(parentKeyNode);
+                            parentPage.tryExtendOrMerge(); // 父页少了一个节点, 尝试拓展
+                        }
+                    }
+                    tryExtendOrMerge();
+                }
+            }
+
+            // 判断是否需要向右边借
+
+        } else {
+            return leNode.getData().children.treeDelete(key);
+        }
 
         return 0;
+    }
+
+    /**
+     * 当且仅当当前页索引个数小于 degree/2 且不为根节点时, 尝试扩展索引个数,
+     * 优先向兄弟页借, 如果兄弟页节点也不够, 就和兄弟页合并(优先右页)
+     */
+    private void tryExtendOrMerge() {
+        if(nodes.getSize() >= bPlusTree.degree / 2){
+            // 当且仅当当前页索引个数小于 degree/2 时才拓展
+            return;
+        }
+        if(parentPage == null){
+            // 根节点不需要考虑
+            return;
+        }
+
+        // 先考虑右边, 右边没有再考虑左边
+        if(parentKeyNode.getNext() != null){
+            BPlusTreeNodePage<K, V> rightBro = parentKeyNode.getNext().getData().children;
+            if(rightBro.nodes.getSize() > bPlusTree.degree / 2){
+                // 借
+                SortedLinkListNode<BPlusTreeNode<K, V>> rightNode = rightBro.nodes.popFront();
+                try {
+                    nodes.pushBack(rightNode);
+                } catch (DisorderedException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                // 合并
+                try {
+                    nodes.merge(rightBro.nodes);
+                } catch (DisorderedException e) {
+                    throw new RuntimeException(e);
+                }
+                // 删除兄弟的索引
+                parentPage.nodes.removeNode(rightBro.parentKeyNode);
+                rightBro.nodes.forEach(node -> {
+                    node.children.parentPage = this;
+                    node.page = this;
+                });
+            }
+        } else {
+            if(parentKeyNode.getPre() == null){
+                return;
+            }
+            // 除了根节点, 其他节点肯定至少有一个兄弟
+            // 根节点前面已经考虑了, 所以到这一步 brother 肯定不为 null, 就不用判断了(错, 有可能删除整页时影响了树结构, 举个例子, 根节点一个索引)
+            BPlusTreeNodePage<K, V> leftBro = parentKeyNode.getPre().getData().children;
+        }
     }
 
 }

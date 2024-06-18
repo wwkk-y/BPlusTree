@@ -13,6 +13,8 @@ public class BPlusTreeNode<K extends Comparable<K>, V> implements Comparable<BPl
     BPlusTreeNodePage<K, V> children; // 子节点页
     V data; // 数据节点, 为叶子时才有
     SortedLinkListNode<BPlusTreeNode<K, V>> leafTreeNode; // 所在叶子节点链表 Node, 为叶子节点时才有
+    BPlusTreeNodePage<K, V> page; // 当前节点所属页
+    SortedLinkListNode<BPlusTreeNode<K, V>> keyListNode; // 索引链表节点
 
     BPlusTreeNode(BPlusTree<K, V> bPlusTree, K key){
         this.bPlusTree = bPlusTree;
@@ -28,20 +30,22 @@ public class BPlusTreeNode<K extends Comparable<K>, V> implements Comparable<BPl
     /**
      * 构建一个叶子节点
      */
-    BPlusTreeNode(BPlusTree<K, V> bPlusTree, K key, V data){
+    BPlusTreeNode(BPlusTree<K, V> bPlusTree, K key, V data, BPlusTreeNodePage<K, V> page){
         this.bPlusTree = bPlusTree;
         this.key = key;
         this.leaf = true;
         this.data = data;
+        this.page = page;
     }
 
     /**
      * 创建一个非叶子节点
      */
-    BPlusTreeNode(BPlusTree<K, V> bPlusTree, K key, BPlusTreeNodePage<K, V> children){
+    BPlusTreeNode(BPlusTree<K, V> bPlusTree, K key, BPlusTreeNodePage<K, V> children, BPlusTreeNodePage<K, V> page){
         this.bPlusTree = bPlusTree;
         this.key = key;
         this.children = children;
+        this.page = page;
     }
 
     @Override

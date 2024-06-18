@@ -130,6 +130,24 @@ public class BPlusTree<K extends Comparable<K>, V> {
                         throw new RuntimeException("非叶子节点不应该有数据");
                     }
                 }
+
+                // 检查所属页
+                if(node.page != cur){
+                    System.out.println("insertedKeys: " + insertedKeys);
+                    System.out.println("sorted: " + insertedKeys.stream().sorted().collect(Collectors.toList()));
+                    System.out.println("keys: " + keys);
+                    System.out.println("node: " + node);
+                    System.out.println("data: " + node.data);
+                    System.out.println("page: " + node.page);
+                    System.out.println("root: " + rootPage);
+                    throw new RuntimeException("所属页不对");
+                }
+                // 检查索引链表节点是否指向自己
+                if(node.keyListNode == null || node.keyListNode.getData() != node){
+                    System.out.println("node: " + node);
+                    System.out.println("keyListNode: " + node.keyListNode);
+                    throw new RuntimeException("索引链表节点没有指向自己");
+                }
             });
         }
 
