@@ -327,37 +327,23 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
                 } else {
                     eNode = leNodePre.getNext();
                 }
-                if(eNode == null || CompareUtil.notEqual(eNode.getData().key, key)){
+                if(eNode == null){
+                    // 这一页删完了, 下一页继续删除
+                    if(parentKeyNode.getNext() != null){
+                        parentKeyNode.getNext().getData().page.treeDelete(key);
+                    }
                     break;
                 }
-
-                // 开始删除当前页满足要求的节点
-                while(eNode != null && CompareUtil.equal(eNode.getData().key, key)){
-                    bPlusTree.leafTreeNodeList.removeNode(eNode.getData().leafTreeNode);
-                    nodes.removeNode(eNode);
-                    eNode = eNode.getNext(); 
+                if(CompareUtil.notEqual(eNode.getData().key, key)){
+                    break;
                 }
+                // 删除当前满足要求的节点
+                bPlusTree.leafTreeNodeList.removeNode(eNode.getData().leafTreeNode);
+                nodes.removeNode(eNode);
 
-                if(eNode == null){
-                    // 当前页没有删完, 下一页继续删
-                }
-
-                // 节点数小于 degree/2 时尝试拓展节点个数
-                if(parentPage != null){
-                    // 非根节点
-                    if(eNode == null){
-                        // 删除了最后一个节点, 需要更新父节点索引
-                        if(leNodePre == null){
-                            // 如果 leNodePre 也为 null, 表示当前页所以数据都删了, 删除父索引
-                            parentPage.nodes.removeNode(parentKeyNode);
-                            parentPage.tryExtendOrMerge(); // 父页少了一个节点, 尝试拓展
-                        }
-                    }
-                    tryExtendOrMerge();
-                }
+                // 当且仅当当前页索引个数小于 degree/2 且不为根节点时, 尝试扩展索引个数
+                tryExtendOrMerge();
             }
-
-            // 判断是否需要向右边借
 
         } else {
             return leNode.getData().children.treeDelete(key);
@@ -404,13 +390,13 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
                     node.children.parentPage = this;
                     node.page = this;
                 });
+                // 更新索引值
+                parentKeyNode.getData().key = nodes.lastElement().key;
             }
-        } else {
-            if(parentKeyNode.getPre() == null){
-                return;
-            }
+        } else if(parentKeyNode.getPre() != null){
             // 除了根节点, 其他节点肯定至少有一个兄弟
-            // 根节点前面已经考虑了, 所以到这一步 brother 肯定不为 null, 就不用判断了(错, 有可能删除整页时影响了树结构, 举个例子, 根节点一个索引)
+            // 根节点前面已经考虑了, 所以到这一步 brother 肯定不为 null, 就不用判断了
+            // (错, 有可能删除整页时影响了树结构, 举个例子, 根节点一个索引)
             BPlusTreeNodePage<K, V> leftBro = parentKeyNode.getPre().getData().children;
         }
     }
