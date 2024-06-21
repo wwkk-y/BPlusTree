@@ -72,7 +72,24 @@ public class BPlusTreeTest {
         // 测试其他的
         testSelect(bPlusTree, keys, values);
         testUpdate(bPlusTree, keys, values);
+        testDelete(bPlusTree, keys, values);
 
+        TestUtil.hr();
+    }
+
+    /**
+     * 测试删除
+     */
+    public static void testDelete(BPlusTree<String, String> bPlusTree, ArrayList<String> keys, ArrayList<String> values){
+//        bPlusTree.check(true);
+        for (int i = 0; i < keys.size(); i++) {
+//            System.out.println("\n");
+//            System.out.printf("delete: %s\n", keys.get(i));
+            bPlusTree.delete(keys.get(i));
+//            bPlusTree.check(true);
+        }
+        bPlusTree.check(false);
+        System.out.println("test delete success");
         TestUtil.hr();
     }
 

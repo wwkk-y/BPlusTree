@@ -15,6 +15,8 @@ public class BPLinkList <T>{
     private void init(@NonNull BPLinkListNode<T> newNode){
         head = newNode;
         tail = newNode;
+        newNode.pre = null;
+        newNode.next = null;
         size = 1;
     }
 

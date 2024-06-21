@@ -58,7 +58,7 @@ public class BPlusTreeNode<K extends Comparable<K>, V> implements Comparable<BPl
         if(!leaf){
             return key.toString();
         } else {
-            return String.format(" [%s: %s] ", key.toString(), data.toString());
+            return String.format(" (%s: %s) ", key.toString(), data.toString());
         }
     }
 }

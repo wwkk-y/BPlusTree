@@ -1,11 +1,9 @@
 package com.BPlusTree.SortedLinkList;
 
-import com.BPlusTree.BPLinkList.BPLinkListNode;
 import com.BPlusTree.util.CompareUtil;
 import lombok.Getter;
 import lombok.NonNull;
 
-import javax.xml.soap.Node;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
@@ -38,6 +36,8 @@ public class SortedLinkList<T extends Comparable<T>> {
     private void init(@NonNull SortedLinkListNode<T> newNode){
         head = newNode;
         tail = newNode;
+        newNode.pre = null;
+        newNode.next = null;
         size = 1;
     }
 
@@ -383,7 +383,27 @@ public class SortedLinkList<T extends Comparable<T>> {
                 throw new RepeatValueException("不能插入重复的元素");
             }
             insertAfter(tail, newNode);
-            tail = newNode;
+        }
+        return newNode;
+    }
+
+    /**
+     * 在头部添加一个节点, 要求插入值保证原链表有序, 否则抛出异常
+     * @return 返回插入元素所在节点
+     * @throws DisorderedException 不满足排序顺序时抛出
+     */
+    public SortedLinkListNode<T> pushFront(SortedLinkListNode<T> newNode) throws DisorderedException{
+        if(head == null){
+            init(newNode);
+        } else {
+            // 判断大小 和 唯一
+            if(CompareUtil.small(head.data, newNode.data)){
+                throw new DisorderedException("头部插入的元素大于最小值: " + head.data + " < " + newNode.data);
+            }
+            if(unique && CompareUtil.equal(head.data, newNode.data)){
+                throw new RepeatValueException("不能插入重复的元素");
+            }
+            insertBefore(head, newNode);
         }
         return newNode;
     }
@@ -395,6 +415,16 @@ public class SortedLinkList<T extends Comparable<T>> {
     public SortedLinkListNode<T> popFront(){
         SortedLinkListNode<T> delNode = head;
         removeNode(head);
+        return delNode;
+    }
+
+    /**
+     * 删除尾部元素
+     * @return 删除的元素节点
+     */
+    public SortedLinkListNode<T> popBack() {
+        SortedLinkListNode<T> delNode = tail;
+        removeNode(delNode);
         return delNode;
     }
 
@@ -424,6 +454,10 @@ public class SortedLinkList<T extends Comparable<T>> {
      * 合并list, list合并到右边
      */
     public void merge(SortedLinkList<T> list) throws DisorderedException {
+        if(list == this){
+            throw new RuntimeException("不可以合并自己");
+        }
+
         if(list.unique != unique){
             throw new RuntimeException("不同类型链表不可合并");
         }
@@ -450,5 +484,42 @@ public class SortedLinkList<T extends Comparable<T>> {
         }
         // 更新 tail
         tail = list.tail;
+    }
+
+    /**
+     * 合并list, list合并到左边
+     */
+    public void mergeLeft(SortedLinkList<T> list) throws DisorderedException {
+        if(list == this){
+            throw new RuntimeException("不可以合并自己");
+        }
+
+        if(list.unique != unique){
+            throw new RuntimeException("不同类型链表不可合并");
+        }
+        if(list.size == 0){
+            return;
+        }
+
+        size += list.getSize();
+        if(tail == null){
+            head = list.head;
+            tail = list.tail;
+        } else {
+            // 检查有序性
+            if(CompareUtil.small(head.data, list.tail.data)){
+                throw new DisorderedException();
+            }
+            // 检查唯一约束
+            if(unique && CompareUtil.equal(head.data, list.tail.data)){
+                throw new RepeatValueException();
+            }
+            // ... tail -> NULL, NULL <- head ...
+            // ... tail <-> head ...
+            list.tail.next = head;
+            head.pre = tail;
+        }
+        // 更新 head
+        head = list.head;
     }
 }

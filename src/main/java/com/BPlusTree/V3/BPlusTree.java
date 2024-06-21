@@ -52,6 +52,15 @@ public class BPlusTree<K extends Comparable<K>, V> {
     }
 
     /**
+     * 删除数据
+     * @param key 索引
+     * @return 删除的行的个数
+     */
+    public int delete(K key){
+        return rootPage.treeDelete(key);
+    }
+
+    /**
      * 测试方法, 广度优先遍历检查节点有没有问题
      * @param out 为 true 时输出
      * @param insertedKeys 插入的key
@@ -73,6 +82,7 @@ public class BPlusTree<K extends Comparable<K>, V> {
 
             // 检测链表 size
             if(cur.nodes.toList().size() != cur.nodes.getSize()){
+                System.out.println("链表: " + cur.nodes);
                 throw new RuntimeException("链表 size 错误");
             }
 
@@ -92,7 +102,11 @@ public class BPlusTree<K extends Comparable<K>, V> {
                 throw new RuntimeException("有父界面时索引不存在");
             }
             if(cur.parentPage != null && CompareUtil.notEqual(cur.parentKeyNode.getData().key, cur.nodes.lastElement().key)){
-                throw new RuntimeException("父界面索引为页里面索引的最大值");
+                System.out.println("父界面: " + cur.parentPage.nodes);
+                System.out.println("当前页: " + cur.nodes);
+                System.out.println("索引: " + cur.parentKeyNode.getData().key);
+                System.out.println("索引.next == null: " + (cur.parentKeyNode.getNext() == null));
+                throw new RuntimeException("父界面索引不为页里面索引的最大值");
             }
 
             cur.nodes.forEach(node -> {

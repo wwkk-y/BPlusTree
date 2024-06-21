@@ -319,6 +319,8 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
                 return 0;
             }
 
+            int result = 0;
+
             SortedLinkListNode<BPlusTreeNode<K, V>> leNodePre = leNode.getPre();
             while (true){
                 SortedLinkListNode<BPlusTreeNode<K, V>> eNode;
@@ -329,8 +331,8 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
                 }
                 if(eNode == null){
                     // 这一页删完了, 下一页继续删除
-                    if(parentKeyNode.getNext() != null){
-                        parentKeyNode.getNext().getData().page.treeDelete(key);
+                    if(parentKeyNode != null && parentKeyNode.getNext() != null){
+                        result += parentKeyNode.getNext().getData().page.treeDelete(key);
                     }
                     break;
                 }
@@ -340,16 +342,20 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
                 // 删除当前满足要求的节点
                 bPlusTree.leafTreeNodeList.removeNode(eNode.getData().leafTreeNode);
                 nodes.removeNode(eNode);
+                result += 1;
+                // 可能移除了最后一个节点, 需要更新索引
+                if(parentPage != null && eNode.getNext() == null && leNodePre != null){
+                    updateParentKey(leNodePre.getData().key);
+                }
 
                 // 当且仅当当前页索引个数小于 degree/2 且不为根节点时, 尝试扩展索引个数
                 tryExtendOrMerge();
             }
 
+            return result;
         } else {
             return leNode.getData().children.treeDelete(key);
         }
-
-        return 0;
     }
 
     /**
@@ -374,6 +380,12 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
                 SortedLinkListNode<BPlusTreeNode<K, V>> rightNode = rightBro.nodes.popFront();
                 try {
                     nodes.pushBack(rightNode);
+
+                    rightNode.getData().page = this;
+                    if(!rightNode.getData().leaf){
+                        rightNode.getData().children.parentPage = this;
+                    }
+
                 } catch (DisorderedException e) {
                     throw new RuntimeException(e);
                 }
@@ -387,18 +399,101 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
                 // 删除兄弟的索引
                 parentPage.nodes.removeNode(rightBro.parentKeyNode);
                 rightBro.nodes.forEach(node -> {
-                    node.children.parentPage = this;
+                    if(!node.leaf){
+                        node.children.parentPage = this;
+                    }
                     node.page = this;
                 });
-                // 更新索引值
-                parentKeyNode.getData().key = nodes.lastElement().key;
             }
+            // 最大值变了, 更新索引值
+            updateParentKey(nodes.lastElement().key);
         } else if(parentKeyNode.getPre() != null){
             // 除了根节点, 其他节点肯定至少有一个兄弟
             // 根节点前面已经考虑了, 所以到这一步 brother 肯定不为 null, 就不用判断了
             // (错, 有可能删除整页时影响了树结构, 举个例子, 根节点一个索引)
             BPlusTreeNodePage<K, V> leftBro = parentKeyNode.getPre().getData().children;
+            // 可能为空, 需要更新索引
+            if(nodes.getSize() == 0){
+                updateParentKey(leftBro.nodes.lastElement().key);
+            }
+            if(leftBro.nodes.getSize() > bPlusTree.degree / 2){
+                // 借
+                SortedLinkListNode<BPlusTreeNode<K, V>> leftNode = leftBro.nodes.popBack();
+                try {
+                    nodes.pushFront(leftNode);
+                } catch (DisorderedException e) {
+                    throw new RuntimeException(e);
+                }
+
+                leftNode.getData().page = this;
+                if(!leftNode.getData().leaf){
+                    leftNode.getData().children.parentPage = this;
+                }
+                // 更新左边节点的索引值
+                leftBro.parentKeyNode.getData().key = leftBro.nodes.lastElement().key;
+            } else {
+                // 合并
+                try {
+                    nodes.mergeLeft(leftBro.nodes);
+                } catch (DisorderedException e) {
+                    throw new RuntimeException(e);
+                }
+                // 删除兄弟的索引
+                parentPage.nodes.removeNode(leftBro.parentKeyNode);
+                leftBro.nodes.forEach(node -> {
+                    if(!node.leaf){
+                        node.children.parentPage = this;
+                    }
+                    node.page = this;
+                });
+            }
+        } else {
+            // 前后都没有兄弟
+            // 如果自己也被删完了, 需要删除父页里索引
+            if(nodes.getSize() == 0){
+                removeParentKey(); // 删除索引
+
+            }
         }
+    }
+
+    /**
+     * 删除索引值
+     */
+    private void removeParentKey() {
+        if(parentPage != null){
+            parentPage.nodes.removeNode(parentKeyNode);
+            if(parentPage.nodes.getSize() == 0){
+                // 父界面也被删完了
+                parentPage.removeParentKey();
+            } else if(parentKeyNode.getNext() == null){
+                // 父界面删除的是最大值
+                parentPage.updateParentKey();
+            }
+        }
+    }
+
+
+
+    /**
+     * 更新索引值
+     * @param newKey 新值
+     */
+    private void updateParentKey(K newKey){
+        // 更新父界面里的索引值, 如果父界面当前索引为最大值, 继续更新父页的父页
+        if(parentPage != null){
+            parentKeyNode.getData().key = newKey;
+            if(parentKeyNode.getNext() == null){
+                parentPage.updateParentKey(newKey);
+            }
+        }
+    }
+
+    /**
+     * 更新索引值
+     */
+    private void updateParentKey(){
+        updateParentKey(nodes.lastElement().key);
     }
 
 }

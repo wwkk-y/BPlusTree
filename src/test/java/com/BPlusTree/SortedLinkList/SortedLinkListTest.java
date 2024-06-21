@@ -5,7 +5,8 @@ import lombok.NonNull;
 
 import java.util.ArrayList;
 
-import static com.BPlusTree.util.TestUtil.*;
+import static com.BPlusTree.util.TestUtil.hr;
+import static com.BPlusTree.util.TestUtil.isSorted;
 
 public class SortedLinkListTest {
 
@@ -267,8 +268,34 @@ public class SortedLinkListTest {
         System.out.println(rightArray);
     }
 
-    public static void main(String[] args) {
+    public static void testMergeLeft(int size1, int size2){
+        SortedLinkList<String> left = generateStrList(size1);
+        SortedLinkList<String> right = new SortedLinkList<>(false);
+        String prefix = "";
+        if(left.getSize() > 0){
+            prefix = left.lastElement();
+        }
+        for (int i = 0; i < size2; i++) {
+            String val = prefix + RandomGenerator.generateRandomString(20);
+            SortedLinkListNode<String> node = right.insert(val);
+            if(node.getData().compareTo(val) != 0){
+                throw new RuntimeException("插入数据不对");
+            }
+        }
+        try {
+            right.mergeLeft(left);
+        } catch (DisorderedException e) {
+            throw new RuntimeException(e);
+        }
+        if(right.getSize() != size1 + size2){
+            throw new RuntimeException("大小错误: " + right.getSize() + " - " + (size1 + size2));
+        }
+        System.out.println(left);
+        System.out.println(right);
+        hr();
+    }
 
+    public static void main(String[] args) {
         try {
             testNull(null);
         } catch (NullPointerException e){
@@ -284,6 +311,9 @@ public class SortedLinkListTest {
                 testMerge(0, 100);
                 testMerge(100, 0);
                 testMerge(100, 100);
+                testMergeLeft(0, 100);
+                testMergeLeft(100, 0);
+                testMergeLeft(100, 100);
             } catch (RepeatValueException e){
                 e.printStackTrace();
             }
