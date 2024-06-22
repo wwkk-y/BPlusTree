@@ -517,7 +517,7 @@ public class SortedLinkList<T extends Comparable<T>> {
             // ... tail -> NULL, NULL <- head ...
             // ... tail <-> head ...
             list.tail.next = head;
-            head.pre = tail;
+            head.pre = list.tail;
         }
         // 更新 head
         head = list.head;

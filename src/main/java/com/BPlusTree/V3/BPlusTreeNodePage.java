@@ -290,7 +290,6 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
             eLeafNode.getData().data = newVal;
             result += 1;
         } else {
-            bPlusTree.check(true);
             // 不为唯一索引时需要扫描多行数据
             SortedLinkListNode<BPlusTreeNode<K, V>> curLeafNode = eLeafNode;
             while(curLeafNode != null && CompareUtil.equal(curLeafNode.getData().key, key)){
@@ -310,70 +309,57 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
      * @return 删除行数
      */
     public int treeDelete(K key){
+        // 查找第一个 >= key 的 node
         SortedLinkListNode<BPlusTreeNode<K, V>> leNode = nodes.findFirstLeNode(new BPlusTreeNode<>(bPlusTree, key));
         if(leNode == null){
             return 0;
         }
 
         if(leaf){
-            if(CompareUtil.notEqual(leNode.getData().key, key)){
-                return 0;
-            }
-
             int result = 0;
-
-            SortedLinkListNode<BPlusTreeNode<K, V>> leNodePre = leNode.getPre();
-            SortedLinkListNode<BPlusTreeNode<K, V>> leafLeNodePre = leNode.getData().leafTreeNode.getPre(); // 叶子节点里的前一个
-
             while (true){
-                SortedLinkListNode<BPlusTreeNode<K, V>> eNode;
-                if(leNodePre == null){
-                    eNode = nodes.getHead();
-                } else {
-                    eNode = leNodePre.getNext();
-                }
-                if(eNode == null){
-                    // 这一页删完了, 从叶子节点里找下一个节点, 下一页继续删除
-                    SortedLinkListNode<BPlusTreeNode<K, V>> nextLeafNode;
-                    if(leafLeNodePre == null){
-                        // 表示当前节点位于最前面, 取第一个
-                        nextLeafNode = bPlusTree.leafTreeNodeList.getHead();
-                    } else {
-                        nextLeafNode = leafLeNodePre.getNext();
-                    }
-                    if(nextLeafNode != null && CompareUtil.equal(nextLeafNode.getData().key, key)){
-                        if( nextLeafNode.getData().page != this){
-                            // 考虑有可能 leNode 就是第一个节点, 这里需要加个判断
-                            // 下一页继续删除
-                            nextLeafNode.getData().page.treeDelete(key);
-                        }
-                    }
-
-                    /*
-                    直接从索引里找下一个节点不行, 需要考虑父页的父页
-                    if(parentKeyNode != null && parentKeyNode.getNext() != null){
-                        result += parentKeyNode.getNext().getData().page.treeDelete(key);
-                    }
-                   */
-                    break;
-                }
-                if(CompareUtil.notEqual(eNode.getData().key, key)){
+                if(CompareUtil.notEqual(leNode.getData().key, key)){
                     break;
                 }
                 // 删除当前满足要求的节点
-                bPlusTree.leafTreeNodeList.removeNode(eNode.getData().leafTreeNode);
-                nodes.removeNode(eNode);
+                bPlusTree.leafTreeNodeList.removeNode(leNode.getData().leafTreeNode);
+                nodes.removeNode(leNode);
                 result += 1;
-                // 可能移除了最后一个节点, 需要更新索引
-                if(parentPage != null && eNode.getNext() == null && leNodePre != null){
-                    updateParentKey(leNodePre.getData().key);
+
+                // 可能移除了最后一个节点
+                if(parentPage != null && leNode.getNext() == null ){
+                    if(leNode.getPre() != null){
+                        // 删除了最大值, 需要更新索引
+                        updateParentKey(leNode.getPre().getData().key);
+                    } else {
+                        // 删除了一整页, 删除索引
+                        removeParentKey();
+                    }
+                    // 继续删除下一页
+                    SortedLinkListNode<BPlusTreeNode<K, V>> nextLeafNode = leNode.getData().leafTreeNode.getNext();
+                    if(nextLeafNode != null){
+                        result += nextLeafNode.getData().page.treeDelete(key);
+                    }
+                    break;
                 }
 
                 // 当且仅当当前页索引个数小于 degree/2 且不为根节点时, 尝试扩展索引个数
-                tryExtendOrMerge();
+                boolean changed = tryExtendOrMerge();
+                // 唯一索引只会删除一个节点
                 if(bPlusTree.unique){
                     break;
                 }
+
+                // 如果改变了当前页, 需要更新 leNode
+                if(changed){
+                    leNode = nodes.findFirstLeNode(new BPlusTreeNode<>(bPlusTree, key));
+                } else {
+                    leNode = leNode.getNext();
+                }
+                if(leNode == null){
+                    break;
+                }
+
             }
 
             return result;
@@ -385,15 +371,16 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
     /**
      * 当且仅当当前页索引个数小于 degree/2 且不为根节点时, 尝试扩展索引个数,
      * 优先向兄弟页借, 如果兄弟页节点也不够, 就和兄弟页合并(优先右页)
+     * @return 有影响时, 返回 true
      */
-    private void tryExtendOrMerge() {
+    private boolean tryExtendOrMerge() {
         if(nodes.getSize() >= bPlusTree.degree / 2){
             // 当且仅当当前页索引个数小于 degree/2 时才拓展
-            return;
+            return false;
         }
         if(parentPage == null){
             // 根节点不需要考虑
-            return;
+            return false;
         }
 
         // 先考虑右边, 右边没有再考虑左边
@@ -428,6 +415,8 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
                     }
                     node.page = this;
                 });
+                // 父页变小了
+                parentPage.tryExtendOrMerge();
             }
             // 最大值变了, 更新索引值
             updateParentKey(nodes.lastElement().key);
@@ -470,6 +459,8 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
                     }
                     node.page = this;
                 });
+                // 父页变小了
+                parentPage.tryExtendOrMerge();
             }
         } else {
             // 前后都没有兄弟
@@ -479,6 +470,8 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
 
             }
         }
+
+        return true;
     }
 
     /**

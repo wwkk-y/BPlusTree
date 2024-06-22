@@ -1,6 +1,7 @@
 package com.BPlusTree.V3;
 
 import com.BPlusTree.SortedLinkList.SortedLinkList;
+import com.BPlusTree.SortedLinkList.SortedLinkListNode;
 import com.BPlusTree.util.CompareUtil;
 import com.BPlusTree.util.TestUtil;
 
@@ -67,7 +68,7 @@ public class BPlusTree<K extends Comparable<K>, V> {
      * @param insertedValues 插入的values
      * @param dataHasNull 存入的 data 是否有 null
      */
-    void check(boolean out,  ArrayList<K> insertedKeys, ArrayList<V> insertedValues, boolean dataHasNull){
+    void check(boolean out,  List<K> insertedKeys, List<V> insertedValues, boolean dataHasNull){
         Queue<BPlusTreeNodePage<K, V>> queue = new LinkedList<>();
         queue.add(rootPage);
 
@@ -81,9 +82,24 @@ public class BPlusTree<K extends Comparable<K>, V> {
             }
 
             // 检测链表 size
-            if(cur.nodes.toList().size() != cur.nodes.getSize()){
+            ArrayList<BPlusTreeNode<K, V>> nodeList = cur.nodes.toList();
+            if(nodeList.size() != cur.nodes.getSize()){
                 System.out.println("链表: " + cur.nodes);
                 throw new RuntimeException("链表 size 错误");
+            }
+
+            // 检查链表指针是否正确
+            if(cur.nodes != null){
+                SortedLinkListNode<BPlusTreeNode<K, V>> tail = cur.nodes.getTail();
+                for (int i = 0; i < nodeList.size(); i++) {
+                    if(tail == null){
+                        throw new RuntimeException("链表指针错误");
+                    }
+                    tail = tail.getPre();
+                }
+                if(tail != null){
+                    throw new RuntimeException("链表指针错误");
+                }
             }
 
             // 检查个数
@@ -165,10 +181,6 @@ public class BPlusTree<K extends Comparable<K>, V> {
             });
         }
 
-        if(out){
-            System.out.printf("keys: %s\n", keys);
-            TestUtil.hr();
-        }
         // 检查 keys 是否排序
         if(!TestUtil.isSorted(keys)){
             throw new RuntimeException("未排序");
@@ -189,17 +201,12 @@ public class BPlusTree<K extends Comparable<K>, V> {
             }
         }
 
-        if(out && insertedValues != null){
-            System.out.printf("insertedValues: %s\n", insertedValues);
-            TestUtil.hr();
-        }
-
         if(out){
             TestUtil.hr();
         }
     }
 
-    void check(boolean out,  ArrayList<K> insertedKeys, ArrayList<V> insertedValues){
+    void check(boolean out,  List<K> insertedKeys, List<V> insertedValues){
         check(out, insertedKeys, insertedValues, false);
     }
 
