@@ -1,5 +1,5 @@
-# 数据库应用级 B+ 树
-> 本项目记录了我是如何一步一步实现数据库应用级 B+ 树(Java)的
+# 数据库应用 B+ 树
+> 本项目记录了我是如何一步一步实现用于数据库底层的 B+ 树(Java)的
 > 
 > 参考文献:
 > - [B+树详解](https://ivanzz1001.github.io/records/post/data-structure/2018/06/16/ds-bplustree)
