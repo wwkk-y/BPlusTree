@@ -290,10 +290,11 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
             eLeafNode.getData().data = newVal;
             result += 1;
         } else {
+            bPlusTree.check(true);
             // 不为唯一索引时需要扫描多行数据
             SortedLinkListNode<BPlusTreeNode<K, V>> curLeafNode = eLeafNode;
             while(curLeafNode != null && CompareUtil.equal(curLeafNode.getData().key, key)){
-                eLeafNode.getData().data = newVal;
+                curLeafNode.getData().data = newVal;
                 result += 1;
 
                 curLeafNode = curLeafNode.getNext();
@@ -322,6 +323,8 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
             int result = 0;
 
             SortedLinkListNode<BPlusTreeNode<K, V>> leNodePre = leNode.getPre();
+            SortedLinkListNode<BPlusTreeNode<K, V>> leafLeNodePre = leNode.getData().leafTreeNode.getPre(); // 叶子节点里的前一个
+
             while (true){
                 SortedLinkListNode<BPlusTreeNode<K, V>> eNode;
                 if(leNodePre == null){
@@ -330,10 +333,28 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
                     eNode = leNodePre.getNext();
                 }
                 if(eNode == null){
-                    // 这一页删完了, 下一页继续删除
+                    // 这一页删完了, 从叶子节点里找下一个节点, 下一页继续删除
+                    SortedLinkListNode<BPlusTreeNode<K, V>> nextLeafNode;
+                    if(leafLeNodePre == null){
+                        // 表示当前节点位于最前面, 取第一个
+                        nextLeafNode = bPlusTree.leafTreeNodeList.getHead();
+                    } else {
+                        nextLeafNode = leafLeNodePre.getNext();
+                    }
+                    if(nextLeafNode != null && CompareUtil.equal(nextLeafNode.getData().key, key)){
+                        if( nextLeafNode.getData().page != this){
+                            // 考虑有可能 leNode 就是第一个节点, 这里需要加个判断
+                            // 下一页继续删除
+                            nextLeafNode.getData().page.treeDelete(key);
+                        }
+                    }
+
+                    /*
+                    直接从索引里找下一个节点不行, 需要考虑父页的父页
                     if(parentKeyNode != null && parentKeyNode.getNext() != null){
                         result += parentKeyNode.getNext().getData().page.treeDelete(key);
                     }
+                   */
                     break;
                 }
                 if(CompareUtil.notEqual(eNode.getData().key, key)){
@@ -350,6 +371,9 @@ public class BPlusTreeNodePage<K extends Comparable<K>, V> {
 
                 // 当且仅当当前页索引个数小于 degree/2 且不为根节点时, 尝试扩展索引个数
                 tryExtendOrMerge();
+                if(bPlusTree.unique){
+                    break;
+                }
             }
 
             return result;

@@ -83,9 +83,16 @@ public class BPlusTreeTest {
     public static void testDelete(BPlusTree<String, String> bPlusTree, ArrayList<String> keys, ArrayList<String> values){
 //        bPlusTree.check(true);
         for (int i = 0; i < keys.size(); i++) {
-//            System.out.println("\n");
-//            System.out.printf("delete: %s\n", keys.get(i));
+            bPlusTree.check(true);
             bPlusTree.delete(keys.get(i));
+            // 删除后不应该有这个节点了
+            ArrayList<String> select = bPlusTree.select(keys.get(i));
+            if(select.size() > 0){
+                System.out.println("\n\nkey: " + keys.get(i));
+                System.out.println("select: " + select);
+                bPlusTree.check(true);
+                throw new RuntimeException("删除出错");
+            }
 //            bPlusTree.check(true);
         }
         bPlusTree.check(false);
@@ -149,12 +156,15 @@ public class BPlusTreeTest {
             values.set(i, RandomGenerator.generateRandomString(5));
             bPlusTree.update(keys.get(i), values.get(i));
             ArrayList<String> valueList = bPlusTree.select(keys.get(i));
-            if(valueList.size() == 0 || valueList.get(0) != values.get(i)){
-                System.out.println(keys);
-                System.out.println(values);
-                System.out.println(keys.get(i));
-                System.out.println(valueList);
-                throw new RuntimeException("更新错误");
+            for (String value : valueList) {
+                if(value != values.get(i)){
+                    System.out.println("keys: " + keys);
+                    System.out.println("values: " + values);
+                    System.out.println("key: " + keys.get(i));
+                    System.out.println("newValue: " + values.get(i));
+                    System.out.println("select: " + valueList);
+                    throw new RuntimeException("更新错误");
+                }
             }
         }
         System.out.println("test update success");
@@ -191,7 +201,7 @@ public class BPlusTreeTest {
     }
 
     public static void main(String[] args) {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 20; i++) {
             testMain(args);
         }
     }
