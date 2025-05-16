@@ -117,7 +117,7 @@
 current 表示当前页, parent 表示父页
 1. current.parentPage = parent, 
 2. current.parentKeyNode in parent.nodes // 索引
-3. current.parentKeyTreeNode.children = parent // 索引节点子页面
+3. current.parentKeyTreeNode.children = current // 索引节点子页面
 4. 对于 current.nodes: 
    - 如果 current 不是叶子, node.children -> current 是 node.children 的父界面, 对 node.children 进行第 1, 2, 3步
    - node.page = current // 所属页
